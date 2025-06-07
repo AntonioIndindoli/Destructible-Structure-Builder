@@ -1,7 +1,6 @@
+using Mayuns.DSB;
 using UnityEngine;
 
-namespace Mayuns.DSB
-{
     public class  ProjectileDamage : MonoBehaviour
 {
     private float damage;

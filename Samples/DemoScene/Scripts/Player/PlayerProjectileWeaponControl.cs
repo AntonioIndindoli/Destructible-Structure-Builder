@@ -1,9 +1,6 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
-namespace Mayuns.DSB
-{
-    public class  PlayerProjectileWeaponControl : MonoBehaviour
+public class PlayerProjectileWeaponControl : MonoBehaviour
 {
     [Header("Projectile Settings")]
     [SerializeField] private Transform muzzleTransform;
@@ -12,9 +9,10 @@ namespace Mayuns.DSB
     [SerializeField] private float damage = 500f;
     [SerializeField] private float explosionRadius = 3f;
 
-    public void OnShoot(InputValue value)
+    void Update()
     {
-        if (value.isPressed)
+        // Check for Fire1 input (default: left mouse button)
+        if (Input.GetButtonDown("Fire1"))
         {
             FireProjectile();
         }

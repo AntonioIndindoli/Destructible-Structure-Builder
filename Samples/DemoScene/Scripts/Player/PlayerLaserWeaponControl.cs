@@ -1,25 +1,28 @@
+using Mayuns.DSB;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
-namespace Mayuns.DSB
-{
-    public class  PlayerLaserWeaponControl : MonoBehaviour
+public class PlayerLaserWeaponControl : MonoBehaviour
 {
     [Header("Laser Settings")]
     [SerializeField] private Transform muzzleTransform;       // Where the raycast originates
     [SerializeField] private Transform laserVisualStartPoint; // Where the line renderer starts
     [SerializeField] private LineRenderer laserRenderer;
-    private float laserRange = 1000f;
+
     public float laserDamagePerSecond = 10000f;
     public float explosionRadius = 3f;
+    private float laserRange = 1000f;
     private bool isFiringLaser = false;
+
     private Vector3 currentLaserStart;
     private Vector3 currentLaserEnd;
-    private float laserStartSmoothSpeed = 10f; // Fast to stay connected to weapon
+    private float laserStartSmoothSpeed = 10f;  // Fast to stay connected to weapon
     private float laserEndSmoothSpeed = 500f;   // Slower for a trailing effect
 
-    private void Update()
+    void Update()
     {
+        // Legacy input: holding down left mouse button (or fire1)
+        isFiringLaser = Input.GetButton("Fire1"); // Default maps to left mouse button
+
         if (isFiringLaser)
         {
             FireLaser();
@@ -30,12 +33,6 @@ namespace Mayuns.DSB
         }
     }
 
-    // Called when the primary fire button is pressed or released
-    public void OnShoot(InputValue value)
-    {
-        isFiringLaser = value.isPressed;
-    }
-
     private void FireLaser()
     {
         Vector3 targetStart = laserVisualStartPoint.position;
@@ -43,10 +40,9 @@ namespace Mayuns.DSB
 
         if (Physics.Raycast(muzzleTransform.position, muzzleTransform.forward, out RaycastHit hit, laserRange))
         {
-            // ── Visuals ───────────────────────────────────────────
             targetEnd = hit.point;
 
-            // ── Direct‑hit damage ────────────────────────────────
+            // Apply continuous damage
             float damageThisFrame = laserDamagePerSecond * Time.deltaTime;
             IDamageable damageable = hit.collider.GetComponent<IDamageable>();
             if (damageable != null)
@@ -59,7 +55,6 @@ namespace Mayuns.DSB
             targetEnd = targetStart + laserVisualStartPoint.forward * laserRange;
         }
 
-        // ── Smooth line‑renderer update (unchanged) ─────────────
         if (!laserRenderer.enabled)
         {
             laserRenderer.enabled = true;
@@ -74,7 +69,7 @@ namespace Mayuns.DSB
         laserRenderer.SetPosition(0, currentLaserStart);
         laserRenderer.SetPosition(1, currentLaserEnd);
 
-        // width & colour pulse (unchanged)
+        // Visual pulsing
         float pulseSpeed = 5f;
         float minWidth = 0.005f;
         float maxWidth = 0.01f;
@@ -86,7 +81,6 @@ namespace Mayuns.DSB
         Color pulseColor = Color.Lerp(baseColor, Color.white, Mathf.PingPong(Time.time * 4f, 1f));
         laserRenderer.material.SetColor("_Color", pulseColor);
     }
-
 
     private void ApplyExplosionDamage(Vector3 center, float radius, float maxDamage)
     {
@@ -104,5 +98,4 @@ namespace Mayuns.DSB
             }
         }
     }
-
 }

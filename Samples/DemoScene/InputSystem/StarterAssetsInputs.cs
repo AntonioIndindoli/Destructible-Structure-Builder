@@ -5,8 +5,6 @@ using UnityEngine.InputSystem;
 
 namespace StarterAssets
 {
-    namespace Mayuns.DSB
-{
     public class  StarterAssetsInputs : MonoBehaviour
     {
         [Header("Character Input Values")]
