@@ -1,0 +1,12 @@
+{
+  "name": "com.mayuns.destructiblebuilder",
+  "displayName": "Destructible Structure Builder",
+  "version": "1.0.0",
+  "unity": "2022.3",
+  "description": "Editor\u2011only gizmo tool for assembling physics\u2011ready, destructible structures.",
+  "author": {
+    "name": "Mayuns Studio",
+    "url": "https://mayuns.com"
+  },
+  "dependencies": {}
+}
