@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8755618148094325242}
   m_Layer: 0
-  m_Name: Sidewalk_Block (3)
+  m_Name: SidewalkSegment
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -115,7 +115,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3088645657252277748}
   m_Layer: 0
-  m_Name: Sidewalk_Block
+  m_Name: SidewalkSegment
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -187,7 +187,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4253887988611361109}
   m_Layer: 0
-  m_Name: Sidewalk_Block (1)
+  m_Name: SidewalkSegment
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -295,7 +295,7 @@ GameObject:
   m_Component:
   - component: {fileID: 775191162591285874}
   m_Layer: 0
-  m_Name: Sidewalk_Block (4)
+  m_Name: SidewalkSegment
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -331,7 +331,7 @@ GameObject:
   - component: {fileID: 651815655273801661}
   - component: {fileID: 3983908434562131434}
   m_Layer: 0
-  m_Name: Cube
+  m_Name: Grass
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -433,7 +433,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4726542030207514009}
   m_Layer: 0
-  m_Name: Sidewalk_Block (2)
+  m_Name: SidewalkSegment
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -517,15 +517,15 @@ Transform:
   m_GameObject: {fileID: 8870199196852120358}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.9416924, y: 15.697024, z: -31.987766}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 3088645657252277748}
+  - {fileID: 4253887988611361109}
   - {fileID: 4726542030207514009}
   - {fileID: 8755618148094325242}
   - {fileID: 775191162591285874}
-  - {fileID: 3088645657252277748}
-  - {fileID: 4253887988611361109}
   - {fileID: 6920740873098606529}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

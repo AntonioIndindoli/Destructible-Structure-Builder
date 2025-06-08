@@ -12,38 +12,28 @@ namespace Mayuns.DSB
 {
 	public class WallManager : MonoBehaviour
 	{
-		[HideInInspector]
-		[SerializeField] public float wallPieceHealth = 100f;
-		[HideInInspector]
-		[SerializeField] public float wallPieceWindowHealth = 1f;
-		[HideInInspector]
-		[SerializeField] public HashSet<StructuralMember> edgeMembers = new HashSet<StructuralMember>();
-		[HideInInspector]
-		[SerializeField] public int numRows = 8;
-		[HideInInspector]
-		[SerializeField] public int numColumns = 8;
-		[SerializeField] public List<Chunk> _chunks = new List<Chunk>();         // all created chunks
-		[HideInInspector]
-		[SerializeField] public float WallPieceMass = 50.0f;
-		[HideInInspector]
-		[SerializeField] public bool isGrouped = false;
-		[SerializeField] public List<WallPiece> wallGrid;
-		[SerializeField] public StructuralGroupManager structuralGroup;
-		[SerializeField] public bool isDamaged = false;
+		[field: SerializeField, HideInInspector] public float wallPieceHealth = 100f;
+		[field: SerializeField, HideInInspector] public float wallPieceWindowHealth = 1f;
+		[field: SerializeField, HideInInspector] public HashSet<StructuralMember> edgeMembers = new HashSet<StructuralMember>();
+		[field: SerializeField, HideInInspector] public int numRows = 8;
+		[field: SerializeField, HideInInspector] public int numColumns = 8;
+		[field: SerializeField, HideInInspector] public List<Chunk> _chunks = new List<Chunk>();         // all created chunks
+		[field: SerializeField, HideInInspector] public float WallPieceMass = 50.0f;
+		[field: SerializeField, HideInInspector] public bool isGrouped = false;
+		[field: SerializeField, HideInInspector] public List<WallPiece> wallGrid;
+		[field: SerializeField, HideInInspector] public StructuralGroupManager structuralGroup;
+		[field: SerializeField, HideInInspector] public bool isDamaged = false;
+		[field: SerializeField, HideInInspector] public float validationInterval = .1f;
+		[field: SerializeField, HideInInspector] public bool validateAgain = false;
+		[field: SerializeField, HideInInspector] public bool isValidating = false;
+		[field: SerializeField, HideInInspector] public bool isRebuildingGrid = false;
+		[field: SerializeField, HideInInspector] public Material glassMaterial;
+		[field: SerializeField, HideInInspector] public Material wallMaterial;
+		private int _lastWallFingerprint;
 		private float variationAmount = .25f;
 		private Vector3[,,] vertexOffsets;
 		private Vector3 worldWallSize;
-		[HideInInspector]
-		public float validationInterval = .1f;
-		public bool validateAgain = false;
-		public bool isValidating = false;
-		public bool isRebuildingGrid = false;
-		private int _lastWallFingerprint;
 
-		[HideInInspector]
-		[SerializeField] public Material glassMaterial;
-		[HideInInspector]
-		[SerializeField] public Material wallMaterial;
 		IEnumerator Start()
 		{
 			if (isGrouped)

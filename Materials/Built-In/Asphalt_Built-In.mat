@@ -69,7 +69,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
-        m_Texture: {fileID: 2800000, guid: e0459f5b3bc71fa4180327e8a9aaaf5f, type: 3}
+        m_Texture: {fileID: 2800000, guid: 8bd18190afe73034586c9a2095c05eac, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _CoatMaskMap:
@@ -113,7 +113,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 6ad7351ebd1c4ab4fb26eea5d5299c1e, type: 3}
+        m_Texture: {fileID: 2800000, guid: 27dc964f7647b014f951835608a17003, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MaskMap:
@@ -137,7 +137,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ParallaxMap:
-        m_Texture: {fileID: 2800000, guid: 48fead88384be0a48a7a30c5e6c73013, type: 3}
+        m_Texture: {fileID: 2800000, guid: a30994dc33df4a24fa3c47806b99bfc0, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SpecGlossMap:
@@ -241,7 +241,7 @@ Material:
     - _EnergyConservingSpecularColor: 1
     - _EnvironmentReflections: 0
     - _GlossMapScale: 1
-    - _Glossiness: 0.5
+    - _Glossiness: 0.186
     - _GlossyReflections: 1
     - _HeightAmplitude: 0.04
     - _HeightCenter: 1

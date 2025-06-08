@@ -5,15 +5,15 @@ namespace Mayuns.DSB
     [System.Serializable]
     public class WallPiece : Destructible, IDamageable
     {
-        public bool isDestroyed = false;
-        [SerializeField] public WallManager manager;
-        public StructuralMember attachedMember;
-        public MemberPiece closestMemberPiece;
-        [SerializeField] public Vector2Int gridPosition;
-        public Chunk chunk;
-        public bool isEdge = false;
-        public bool isProxy = false;
-        public float accumulatedDamage = 0;
+        [field: SerializeField, HideInInspector] public bool isDestroyed = false;
+        [field: SerializeField, HideInInspector] public WallManager manager;
+        [field: SerializeField, HideInInspector] public StructuralMember attachedMember;
+        [field: SerializeField, HideInInspector] public MemberPiece closestMemberPiece;
+        [field: SerializeField, HideInInspector] public Vector2Int gridPosition;
+        [field: SerializeField, HideInInspector] public Chunk chunk;
+        [field: SerializeField, HideInInspector] public bool isEdge = false;
+        [field: SerializeField, HideInInspector] public bool isProxy = false;
+        [field: SerializeField, HideInInspector] public float accumulatedDamage = 0;
         public enum TriangularCornerDesignation
         {
             None,
@@ -22,9 +22,10 @@ namespace Mayuns.DSB
             BottomLeft,
             BottomRight
         }
-        [SerializeField] public TriangularCornerDesignation cornerDesignation = TriangularCornerDesignation.None;
-        [SerializeField] public bool isWindow;
-        [SerializeField] public bool isEmpty;
+        [field: SerializeField, HideInInspector] public TriangularCornerDesignation cornerDesignation = TriangularCornerDesignation.None;
+        [field: SerializeField, HideInInspector] public bool isWindow;
+        [field: SerializeField, HideInInspector] public bool isEmpty;
+        
         public void DestroyWallPiece()
         {
             TakeDamage(manager.wallPieceHealth);

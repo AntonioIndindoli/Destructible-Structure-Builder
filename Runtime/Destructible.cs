@@ -8,8 +8,7 @@ namespace Mayuns.DSB
 {
     public abstract class Destructible : MonoBehaviour
     {
-        [Header("Gibs (Debris)")]
-        public DebrisData[] gibs;
+        [field: SerializeField, HideInInspector] public DebrisData[] gibs;
         private GibManager gibManager;
 
         void Awake()

@@ -5,12 +5,13 @@ namespace Mayuns.DSB
 {
 	public class Chunk : MonoBehaviour, IDamageable
 	{
-		[SerializeField] public WallManager wallManager;
-		[SerializeField] public StructuralMember structuralMember;
-		[SerializeField] public StructuralGroupManager structuralGroup;
+		[field: SerializeField, HideInInspector] public WallManager wallManager;
+		[field: SerializeField, HideInInspector] public StructuralMember structuralMember;
+		[field: SerializeField, HideInInspector] public StructuralGroupManager structuralGroup;
+		[field: SerializeField, HideInInspector] public List<GameObject> wallPieces;
+		[field: SerializeField, HideInInspector] public bool IsBroken;
 		[SerializeField] public float accumulatedDamage = 0;
-		[SerializeField] public List<GameObject> wallPieces;
-		[SerializeField] public bool IsBroken;
+
 		void Start()
 		{
 			if (structuralGroup == null)

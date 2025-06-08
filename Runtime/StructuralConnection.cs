@@ -94,8 +94,8 @@ namespace Mayuns.DSB
     [System.Serializable]
     sealed class MemberMap : ISerializationCallbackReceiver
     {
-        [SerializeField] List<Slot> keys = new();
-        [SerializeField] List<StructuralMember> values = new();
+        [field: SerializeField, HideInInspector] List<Slot> keys = new();
+        [field: SerializeField, HideInInspector] List<StructuralMember> values = new();
         readonly Dictionary<Slot, StructuralMember> dict = new();
 
         public StructuralMember this[Slot s]
@@ -131,13 +131,10 @@ namespace Mayuns.DSB
 
     public class StructuralConnection : Destructible, IDamageable
     {
-        [SerializeField] MemberMap _members = new();
-
-        [field: SerializeField, HideInInspector]
-        public StructuralGroupManager structuralGroup;
+        [field: SerializeField, HideInInspector] MemberMap _members = new();
+        [field: SerializeField, HideInInspector] public StructuralGroupManager structuralGroup;
+        [field: SerializeField, HideInInspector] public bool isDestroyed;
         public float health = 100f;
-        [field: SerializeField, HideInInspector]
-        public bool isDestroyed;
 
         void Start() => CreateAndStoreDebrisData(1, false);
 
