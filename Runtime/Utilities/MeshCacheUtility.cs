@@ -109,6 +109,54 @@ namespace Mayuns.DSB
             }
             return dst;
         }
+
+        /// <summary>
+        /// Remove cached meshes that are not referenced by any wall or structural
+        /// member in the currently open scenes.
+        /// </summary>
+        public static void CleanUnusedCache()
+        {
+            if (!AssetDatabase.IsValidFolder(CachePath))
+                return;
+
+            // Gather all mesh asset paths used by objects in loaded scenes
+            var usedPaths = new System.Collections.Generic.HashSet<string>();
+            for (int i = 0; i < UnityEditor.SceneManagement.EditorSceneManager.sceneCount; ++i)
+            {
+                var scene = UnityEditor.SceneManagement.EditorSceneManager.GetSceneAt(i);
+                if (!scene.isLoaded) continue;
+
+                foreach (var root in scene.GetRootGameObjects())
+                {
+                    foreach (var mf in root.GetComponentsInChildren<MeshFilter>(true))
+                    {
+                        Mesh m = mf.sharedMesh;
+                        string p = AssetDatabase.GetAssetPath(m);
+                        if (!string.IsNullOrEmpty(p) && p.StartsWith(CachePath))
+                            usedPaths.Add(p);
+                    }
+
+                    foreach (var mc in root.GetComponentsInChildren<MeshCollider>(true))
+                    {
+                        Mesh m = mc.sharedMesh;
+                        string p = AssetDatabase.GetAssetPath(m);
+                        if (!string.IsNullOrEmpty(p) && p.StartsWith(CachePath))
+                            usedPaths.Add(p);
+                    }
+                }
+            }
+
+            // Delete any cached mesh that isn't referenced
+            string[] guids = AssetDatabase.FindAssets("t:Mesh", new[] { CachePath });
+            foreach (string guid in guids)
+            {
+                string assetPath = AssetDatabase.GUIDToAssetPath(guid);
+                if (!usedPaths.Contains(assetPath))
+                    AssetDatabase.DeleteAsset(assetPath);
+            }
+
+            AssetDatabase.Refresh();
+        }
     }
 }
 #endif
