@@ -680,6 +680,9 @@ namespace Mayuns.DSB.Editor
                     MeshCacheUtility.PickFolder();
 
                 EditorGUILayout.EndHorizontal();
+
+                if (GUILayout.Button("Clean Cache"))
+                    MeshCacheUtility.CleanUnusedCache();
             }
 
             EditorGUILayout.Space(4);
