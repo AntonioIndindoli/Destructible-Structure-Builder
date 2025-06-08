@@ -570,6 +570,7 @@ namespace Mayuns.DSB.Editor
             buildSettings.memberLength = EditorGUILayout.FloatField("Member Length", buildSettings.memberLength);
             buildSettings.memberThickness = EditorGUILayout.FloatField("Member Thickness", buildSettings.memberThickness);
             buildSettings.memberMass = EditorGUILayout.FloatField("Member Mass", buildSettings.memberMass);
+            buildSettings.memberPieceHealth = EditorGUILayout.FloatField("Member Piece Health", buildSettings.memberPieceHealth);
             buildSettings.memberSupportCapacity = EditorGUILayout.FloatField("Member Support Capacity", buildSettings.memberSupportCapacity);
             buildSettings.memberMaterial = (Material)EditorGUILayout.ObjectField("Member Material", buildSettings.memberMaterial, typeof(Material), false);
             buildSettings.disableDirection = (DisableDirection)EditorGUILayout.EnumPopup("Disable Direction", buildSettings.disableDirection);
@@ -596,6 +597,9 @@ namespace Mayuns.DSB.Editor
             GUILayout.Label("Materials", EditorStyles.boldLabel);
             buildSettings.wallMaterial = (Material)EditorGUILayout.ObjectField("Wall Material", buildSettings.wallMaterial, typeof(Material), false);
             buildSettings.glassMaterial = (Material)EditorGUILayout.ObjectField("Wall Glass Material", buildSettings.glassMaterial, typeof(Material), false);
+            buildSettings.wallPieceMass = EditorGUILayout.FloatField("Wall Piece Mass", buildSettings.wallPieceMass);
+            buildSettings.wallPieceHealth = EditorGUILayout.FloatField("Wall Piece Health", buildSettings.wallPieceHealth);
+            buildSettings.wallPieceWindowHealth = EditorGUILayout.FloatField("Window Piece Health", buildSettings.wallPieceWindowHealth);
 
             EditorGUIUtility.labelWidth = originalLabelWidth;
         }

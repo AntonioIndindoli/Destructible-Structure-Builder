@@ -660,6 +660,9 @@ namespace Mayuns.DSB.Editor
             wall.numColumns = design.columns;
             wall.numRows = design.rows;
             wall.wallGrid = new List<WallPiece>(new WallPiece[wall.numColumns * wall.numRows]);
+            wall.WallPieceMass = buildSettings.wallPieceMass;
+            wall.wallPieceHealth = buildSettings.wallPieceHealth;
+            wall.wallPieceWindowHealth = buildSettings.wallPieceWindowHealth;
 
             for (int row = 0; row < wall.numRows; row++)
             {
@@ -1010,6 +1013,7 @@ namespace Mayuns.DSB.Editor
                         buildSettings.memberLength,
                         buildSettings.memberThickness,
                         buildSettings.memberMass,
+                        buildSettings.memberPieceHealth,
                         buildSettings.memberSupportCapacity,
                         buildSettings.connectionSize
                         );
@@ -1029,6 +1033,7 @@ namespace Mayuns.DSB.Editor
                     float baseLength,
                     float thickness,
                     float memberMass,
+                    float memberPieceHealth,
                     float memberSupportCapacity,
                     float connectionThickness)
         {
@@ -1091,6 +1096,7 @@ namespace Mayuns.DSB.Editor
             newMem.thickness = thickness;
             newMem.length = baseLength;
             newMem.mass = memberMass;
+            newMem.memberPieceHealth = memberPieceHealth;
             newMem.supportCapacity = memberSupportCapacity;
             newMem.BuildMember();
 
@@ -1312,6 +1318,10 @@ namespace Mayuns.DSB.Editor
 
             // Add the WallManager script to the wall for functionality
             WallManager spawnedWall = Undo.AddComponent<WallManager>(wall);
+
+            spawnedWall.WallPieceMass = buildSettings.wallPieceMass;
+            spawnedWall.wallPieceHealth = buildSettings.wallPieceHealth;
+            spawnedWall.wallPieceWindowHealth = buildSettings.wallPieceWindowHealth;
 
             StructuralGroupManager structuralGroup = parent.GetComponent<StructuralGroupManager>();
             if (structuralGroup)
