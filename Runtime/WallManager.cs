@@ -1,12 +1,11 @@
 using UnityEngine;
 using System.Collections.Generic;
-using Unity.Collections;
 using System.Collections;
 using System.Linq;
-using Unity.Jobs;
 
 #if UNITY_EDITOR
 using UnityEditor;
+using System.IO;
 #endif
 
 namespace Mayuns.DSB
@@ -39,6 +38,7 @@ namespace Mayuns.DSB
 		public bool validateAgain = false;
 		public bool isValidating = false;
 		public bool isRebuildingGrid = false;
+		private int _lastWallFingerprint;
 
 		[HideInInspector]
 		[SerializeField] public Material glassMaterial;
@@ -290,7 +290,7 @@ namespace Mayuns.DSB
 						}
 					}
 #if UNITY_EDITOR
-				DestroyImmediate(chunk.gameObject);
+					DestroyImmediate(chunk.gameObject);
 #else
 					Destroy(chunk.gameObject);
 #endif
@@ -707,516 +707,451 @@ namespace Mayuns.DSB
 		}
 
 #if UNITY_EDITOR
-	private bool IsEdge(GameObject obj)
-	{
-		if (obj == null)
-			return true;
-
-		WallPiece wp = obj.GetComponent<WallPiece>();
-		return wp != null && (wp.cornerDesignation != WallPiece.TriangularCornerDesignation.None || wp.isWindow);
-	}
-
-	private bool IsWindow(GameObject obj)
-	{
-		if (obj == null) return false;
-
-		WallPiece wp = obj.GetComponent<WallPiece>();
-		return wp != null && wp.isWindow;
-	}
-
-	public void BuildWall(List<WallPiece> wallGrid, bool rebuilding, StructureBuildSettings buildSettings)
-	{
-		int fp = ComputeFingerprint();
-		bool cacheHit = false;
-		StructureBuildSettings.WallMeshCacheEntry cacheEntry = null;
-
-		// Get the MeshFilter component of the current GameObject
-		MeshFilter meshFilter = GetComponent<MeshFilter>();
-		if (meshFilter == null)
+		private bool IsEdge(GameObject obj)
 		{
-			Debug.LogError("The GameObject must have a MeshFilter component.");
-			return;
+			if (obj == null)
+				return true;
+
+			WallPiece wp = obj.GetComponent<WallPiece>();
+			return wp != null && (wp.cornerDesignation != WallPiece.TriangularCornerDesignation.None || wp.isWindow);
 		}
 
-		// Get the original mesh and material
-		Mesh originalMesh = meshFilter.sharedMesh;
-		Material originalMaterial = wallMaterial;
-
-		if (glassMaterial == null)
+		private bool IsWindow(GameObject obj)
 		{
-			glassMaterial = originalMaterial;
+			if (obj == null) return false;
+
+			WallPiece wp = obj.GetComponent<WallPiece>();
+			return wp != null && wp.isWindow;
 		}
 
-		GetComponent<MeshRenderer>().enabled = false;
-
-		Bounds bounds = originalMesh.bounds;
-		Vector3 wallSize = bounds.size;
-		Vector3 wallScale = transform.localScale;
-		worldWallSize = Vector3.Scale(wallSize, wallScale);
-
-		// Calculate the correct cube size based on the rotated wall size
-		Vector3 cubeSize = new Vector3(worldWallSize.x / numColumns, worldWallSize.y / numRows, worldWallSize.z / 1);
-
-		if (buildSettings != null)
+		public int ComputeFingerprint()
 		{
-			if (buildSettings.TryGetWallMesh(fp, out var hit))
+			unchecked
 			{
-				cacheEntry = hit;
-				cacheHit = true;
+				int hash = 17;
+				hash = hash * 31 + numRows;
+				hash = hash * 31 + numColumns;
+
+				for (int i = 0; i < wallGrid.Count; ++i)
+				{
+					WallPiece p = wallGrid[i];
+
+					// treat “hole” and “proxy” the same
+					if (p == null || p.isProxy) { hash = hash * 31; continue; }
+
+					int code = p.isWindow ? 2 :
+							   (p.cornerDesignation != WallPiece.TriangularCornerDesignation.None ? 3 : 1);
+
+					hash = hash * 31 + code;
+				}
+				return hash;
 			}
 		}
 
-		// Initialize vertex offsets with consideration for missing wall pieces
-		vertexOffsets = new Vector3[numColumns + 1, numRows + 1, 2];
-		for (int x = 0; x <= numColumns; x++)
+		/*–– helper to build a voxel from an already‑cached mesh –––––––––––––*/
+		GameObject CreateVoxelFromCachedMesh(int gx, int gy,
+											 Vector3 worldPos, Vector3 cubeSize,
+											 bool isWindow, bool isTriangle,
+											 Mesh cachedMesh, Material defaultMat)
 		{
-			for (int y = 0; y <= numRows; y++)
-			{
-				for (int z = 0; z <= 1; z++)
-				{
-					bool isEdge = (x == 0 || x == numColumns || y == 0 || y == numRows);
-					bool adjacentToNull = false;
-					bool allWindows = false;
-					if (!isEdge && rebuilding)
+			string n = isWindow ? $"WallWindowVoxel_{gx}_{gy}" :
+					   isTriangle ? $"WallTriangleVoxel_{gx}_{gy}" :
+									 $"WallVoxel_{gx}_{gy}";
+
+			var go = new GameObject(n);
+			go.transform.SetPositionAndRotation(worldPos, Quaternion.identity);
+			go.transform.localScale = new(1f / numColumns, 1f / numRows, 1f);
+
+			var mf = go.AddComponent<MeshFilter>();
+			mf.sharedMesh = cachedMesh;
+
+			var mr = go.AddComponent<MeshRenderer>();
+			mr.sharedMaterial = isWindow ? glassMaterial : defaultMat;
+
+			return go;
+		}
+
+		/*───────────────────────────────────────────────────────────────────*\
+         *  BUILD‑WALL  (editor‑only version)                                *
+        \*───────────────────────────────────────────────────────────────────*/
+		public void BuildWall(List<WallPiece> wallGrid, bool rebuilding, StructureBuildSettings _)
+		{
+			int fp = ComputeFingerprint();   // walls that “look” the same share fp
+			_lastWallFingerprint = fp;
+
+			/*–––– basic data from the source mesh –––––*/
+			MeshFilter mfRoot = GetComponent<MeshFilter>();
+			if (!mfRoot) { Debug.LogError("Wall needs a MeshFilter"); return; }
+
+			Mesh srcMesh = mfRoot.sharedMesh;
+			Material defaultMat = wallMaterial;
+			if (glassMaterial == null) glassMaterial = defaultMat;
+
+			GetComponent<MeshRenderer>().enabled = false;
+
+			Bounds b = srcMesh.bounds;
+			Vector3 scale = transform.localScale;
+			worldWallSize = Vector3.Scale(b.size, scale);
+			Vector3 cubeSize = new(worldWallSize.x / numColumns,
+								   worldWallSize.y / numRows,
+								   worldWallSize.z);
+
+			/*–––– vertexOffsets code (identical to your original) –––––*/
+			vertexOffsets = new Vector3[numColumns + 1, numRows + 1, 2];
+			for (int x = 0; x <= numColumns; ++x)
+				for (int y = 0; y <= numRows; ++y)
+					for (int z = 0; z <= 1; ++z)
 					{
-						// Check if any of the 4 surrounding pieces are null OR triangular.
-						WallPiece piece00 = wallGrid[(x - 1) + (y - 1) * numColumns];
-						WallPiece piece10 = wallGrid[x + (y - 1) * numColumns];
-						WallPiece piece01 = wallGrid[(x - 1) + y * numColumns];
-						WallPiece piece11 = wallGrid[x + y * numColumns];
+						bool edge = (x == 0 || x == numColumns || y == 0 || y == numRows);
+						bool adjNull = false, allWin = false;
 
-						allWindows =
-							IsWindow(piece00?.gameObject) &&
-							IsWindow(piece10?.gameObject) &&
-							IsWindow(piece01?.gameObject) &&
-							IsWindow(piece11?.gameObject);
-
-						bool anyEdgeOrMissing =
-							IsEdge(piece00?.gameObject) ||
-							IsEdge(piece10?.gameObject) ||
-							IsEdge(piece01?.gameObject) ||
-							IsEdge(piece11?.gameObject);
-
-						if (anyEdgeOrMissing && !allWindows)
+						if (!edge && rebuilding)
 						{
-							adjacentToNull = true;
+							WallPiece p00 = wallGrid[(x - 1) + (y - 1) * numColumns];
+							WallPiece p10 = wallGrid[x + (y - 1) * numColumns];
+							WallPiece p01 = wallGrid[(x - 1) + y * numColumns];
+							WallPiece p11 = wallGrid[x + y * numColumns];
+
+							allWin = IsWindow(p00?.gameObject) && IsWindow(p10?.gameObject) &&
+									  IsWindow(p01?.gameObject) && IsWindow(p11?.gameObject);
+
+							bool anyEdgeOrMissing =
+									  IsEdge(p00?.gameObject) || IsEdge(p10?.gameObject) ||
+									  IsEdge(p01?.gameObject) || IsEdge(p11?.gameObject);
+
+							if (anyEdgeOrMissing && !allWin) adjNull = true;
 						}
 
-					}
-					// If the vertex is at the overall edge or adjacent to a missing wall piece,
-					// set the offset to zero. Otherwise, apply random variation.
-					if (isEdge || adjacentToNull)
-					{
-						vertexOffsets[x, y, z] = Vector3.zero;
-					}
-					else if (allWindows)
-					{
-						vertexOffsets[x, y, z] = new Vector3(
-							Random.Range(0, variationAmount),
-							Random.Range(0, variationAmount),
-							0
-						);
-					}
-					else
-					{
-						vertexOffsets[x, y, z] = new Vector3(
-							Random.Range(-variationAmount * 2, variationAmount * 2),
-							Random.Range(-variationAmount * 2, variationAmount * 2),
-							0
-						);
+						if (edge || adjNull) vertexOffsets[x, y, z] = Vector3.zero;
+						else if (allWin) vertexOffsets[x, y, z] = new(Random.Range(0, variationAmount),
+																					   Random.Range(0, variationAmount), 0);
+						else vertexOffsets[x, y, z] = new(Random.Range(-variationAmount * 2, variationAmount * 2),
+																					   Random.Range(-variationAmount * 2, variationAmount * 2), 0);
 					}
 
-				}
-			}
-		}
-
-		for (int y = 0; y < numRows; y++)
-		{
-			for (int x = 0; x < numColumns; x++)
-			{
-				bool cellExists = wallGrid[x + y * numColumns] != null;
-				if ((rebuilding && cellExists) ||
-					(!rebuilding && !cellExists))
+			/*–––– main grid loop –––––*/
+			for (int gy = 0; gy < numRows; ++gy)
+				for (int gx = 0; gx < numColumns; ++gx)
 				{
-					int idx = x + y * numColumns;
-					int z = 0;
-					bool isCached = cacheHit && cacheEntry.pieceMeshes[idx] != null;
+					bool cellExists = wallGrid[gx + gy * numColumns] != null;
+
+					int idx = gx + gy * numColumns;
 
 					Vector3 localPos = new(
-						(x * cubeSize.x - worldWallSize.x * .5f + cubeSize.x * .5f) / wallScale.x,
-						(y * cubeSize.y - worldWallSize.y * .5f + cubeSize.y * .5f) / wallScale.y,
-						(z * cubeSize.z - worldWallSize.z * .5f + cubeSize.z * .5f) / wallScale.z);
+						(gx * cubeSize.x - worldWallSize.x * .5f + cubeSize.x * .5f) / scale.x,
+						(gy * cubeSize.y - worldWallSize.y * .5f + cubeSize.y * .5f) / scale.y,
+						(-worldWallSize.z * .5f + cubeSize.z * .5f) / scale.z);
 
 					Vector3 worldPos = transform.TransformPoint(localPos);
 
-					GameObject voxelGO = null;
-					WallPiece voxelComp = null;
-					bool isWindow = false;
-					bool isTri = false;
-
-					// if we are *re‑building* replace the old piece
+					/*–‑ gather old info (window / triangle) –‑*/
 					WallPiece old = cellExists ? wallGrid[idx] : null;
+					bool isWindow = old?.isWindow ?? false;
+					bool isTri = old && old.cornerDesignation != WallPiece.TriangularCornerDesignation.None;
+					if (old) Undo.DestroyObjectImmediate(old.gameObject);
 
-					if (old != null)
+					/*–‑ see if mesh is already cached –‑*/
+					Mesh cachedMesh = null;
+					if (MeshCacheUtility.Enabled)
 					{
-						isWindow = old.isWindow;
-						isTri = old.cornerDesignation != WallPiece.TriangularCornerDesignation.None;
-						Undo.DestroyObjectImmediate(old.gameObject);
+						cachedMesh = MeshCacheUtility.TryLoad(fp, idx);
 					}
 
-					// ----------------------------------------------------------------
-					// (A) FAST PATH – pull mesh from cache
-					// ----------------------------------------------------------------
-					if (isCached)
-					{
-						voxelGO = CreateVoxelFromCache(
-									 x, y, worldPos, cubeSize,
-									 isWindow, isTri,
-									 cacheEntry.pieceMeshes[idx],
-									 originalMaterial);
+					GameObject voxelGO;
+					WallPiece voxelComp;
 
+					if (cachedMesh)   /*───────── FAST PATH ─────────*/
+					{
+						voxelGO = CreateVoxelFromCachedMesh(gx, gy, worldPos, cubeSize,
+															isWindow, isTri,
+															cachedMesh, defaultMat);
 						Undo.RegisterCreatedObjectUndo(voxelGO, "Create Cached Voxel");
 						voxelComp = Undo.AddComponent<WallPiece>(voxelGO);
-
-						// window & triangle flags come from previous check
 						voxelComp.isWindow = isWindow;
-						voxelComp.cornerDesignation = isTri ? old.cornerDesignation : 0;
+						voxelComp.cornerDesignation = isTri ? old?.cornerDesignation ?? 0 : 0;
 					}
-					// ----------------------------------------------------------------
-					// (B) SLOW PATH – run the procedural builders
-					// ----------------------------------------------------------------
-					else
+					else              /*───────── SLOW / PROC PATH ──*/
 					{
 						if (isTri)
-						{
 							voxelGO = VoxelBuildingUtility.CreateTriangle(
-										  cubeSize, worldPos, x, y, z,
-										  originalMaterial, cubeSize,
-										  old.cornerDesignation,
-										  worldWallSize, numRows, numColumns,
-										  "WallTriangleVoxel");
-						}
+										 cubeSize, worldPos, gx, gy, 0,
+										 defaultMat, cubeSize, old?.cornerDesignation ?? 0,
+										 worldWallSize, numRows, numColumns,
+										 "WallTriangleVoxel");
 						else if (isWindow)
-						{
 							voxelGO = VoxelBuildingUtility.CreateWindow(
-										  cubeSize, worldPos, x, y,
-										  glassMaterial, cubeSize,
-										  vertexOffsets, worldWallSize,
-										  numRows, numColumns, "WallWindowVoxel");
-						}
+										 cubeSize, worldPos, gx, gy, glassMaterial,
+										 cubeSize, vertexOffsets, worldWallSize,
+										 numRows, numColumns, "WallWindowVoxel");
 						else
-						{
 							voxelGO = VoxelBuildingUtility.CreateIrregularCube(
-										  cubeSize, worldPos, x, y, z,
-										  originalMaterial, cubeSize,
-										  vertexOffsets, worldWallSize,
-										  numRows, numColumns, 1, "WallVoxel");
-						}
+										 cubeSize, worldPos, gx, gy, 0,
+										 defaultMat, cubeSize, vertexOffsets,
+										 worldWallSize, numRows, numColumns,
+										 1, "WallVoxel");
 
 						Undo.RegisterCreatedObjectUndo(voxelGO, "Create Wall Voxel");
 						voxelComp = Undo.AddComponent<WallPiece>(voxelGO);
-
 						voxelComp.isWindow = isWindow;
-						voxelComp.cornerDesignation = isTri ? old.cornerDesignation : 0;
+						voxelComp.cornerDesignation = isTri ? old?.cornerDesignation ?? 0 : 0;
+
+						MeshFilter mf = voxelGO.GetComponent<MeshFilter>();
+						if (mf && mf.sharedMesh)
+							mf.sharedMesh = MeshCacheUtility.Persist(mf.sharedMesh, fp, idx);
 					}
 
-					// ----- common finalisation --------------------------------------
-					SetupWallComponent(voxelComp, localPos, x, y, isWindow);
+					/*‑‑ common finalisation –‑*/
+					SetupWallComponent(voxelComp, localPos, gx, gy, isWindow);
 				}
-			}
+
+			if (numColumns > 2 && numRows > 2)
+				CombineWall();
 		}
 
-		if (!cacheHit && !rebuilding)
-			CacheWall(buildSettings);
-
-		if (numColumns > 2 && numRows > 2)
-			CombineWall();
-
-	}
-
-	public void CacheWall(StructureBuildSettings buildSettings)
-	{
-		int fp = ComputeFingerprint();
-		int cellCount = numColumns * numRows;
-		Mesh[] singles = new Mesh[cellCount];
-
-		if (buildSettings != null)
+		void OnEnable()
 		{
-			for (int y = 0; y < numRows; ++y)
-				for (int x = 0; x < numColumns; ++x)
+			Undo.undoRedoPerformed -= OnUndoRedo;
+			Undo.undoRedoPerformed += OnUndoRedo;
+		}
+
+		void OnDisable()
+		{
+			Undo.undoRedoPerformed -= OnUndoRedo;
+		}
+
+		private void OnUndoRedo()
+		{
+			// pick your default here:
+			RelinkWallGridReferences();
+		}
+
+		private void SetupWallComponent(WallPiece wallComponent, Vector3 localCubePosition, int x, int y, bool isWindow)
+		{
+			// Record wall manager for wallGrid change
+			Undo.RecordObject(this, "Assign Wall Piece in Grid");
+			Mesh mesh = wallComponent.GetComponent<MeshFilter>()?.sharedMesh;
+
+			if (isWindow || mesh.bounds.size.z < 0.01f)
+			{
+				BoxCollider boxCollider = Undo.AddComponent<BoxCollider>(wallComponent.gameObject);
+			}
+			else
+			{
+				// Add MeshCollider with Undo so it can be removed on undo
+				MeshCollider meshCollider = Undo.AddComponent<MeshCollider>(wallComponent.gameObject);
+				meshCollider.convex = true;
+			}
+
+
+			// Cache original transform values
+			Vector3 localScale = wallComponent.transform.localScale;
+			Quaternion localRotation = wallComponent.transform.localRotation;
+
+			// Record transform changes for undo
+			Undo.RecordObject(wallComponent.transform, "Move Wall Component");
+
+			wallComponent.transform.SetParent(this.transform, true);
+			wallComponent.transform.localPosition = localCubePosition;
+			wallComponent.transform.localScale = localScale;
+			wallComponent.transform.localRotation = localRotation;
+
+			// Record WallPiece for undo before modifying its fields
+			Undo.RecordObject(wallComponent, "Update Wall Piece Data");
+			wallComponent.manager = this;
+			wallComponent.gridPosition = new Vector2Int(x, y);
+
+			// Remove old wall piece at this grid position (with Undo)
+			if (wallGrid[x + y * numColumns] != null && wallGrid[x + y * numColumns] != wallComponent)
+			{
+				Undo.DestroyObjectImmediate(wallGrid[x + y * numColumns].gameObject);
+			}
+
+			wallGrid[x + y * numColumns] = wallComponent;
+		}
+
+		public void CombineWall()
+		{
+			_chunks.RemoveAll(chunk => chunk == null);
+
+			for (int gx = 0; gx < numColumns; gx += numColumns / 2)
+			{
+				for (int gy = 0; gy < numRows; gy += numRows / 2)
 				{
-					WallPiece wp = wallGrid[x + y * numColumns];
-					if (wp == null || wp.isProxy) continue;        // hole or chunk proxy
-
-					MeshFilter mf = wp.GetComponent<MeshFilter>();
-					singles[x + y * numColumns] = mf ? mf.sharedMesh : null;
+					BuildChunk(gx, gy);
 				}
-
-			buildSettings.SaveWallMeshes(fp, singles);
-		}
-	}
-
-	GameObject CreateVoxelFromCache(int gx, int gy,
-									Vector3 worldPos, Vector3 cubeSize,
-									bool isWindow, bool isTriangle,
-									Mesh cachedMesh, Material defaultMat)
-	{
-		var go = new GameObject(isWindow ? $"WallWindowVoxel_{gx}_{gy}" :
-								isTriangle ? $"WallTriangleVoxel_{gx}_{gy}" :
-											  $"WallVoxel_{gx}_{gy}");
-
-		go.transform.SetPositionAndRotation(worldPos, Quaternion.identity);
-		go.transform.localScale = new Vector3(1.0f / (float)numColumns, 1.0f / (float)numRows, 1.0f);
-		var mf = go.AddComponent<MeshFilter>();
-		mf.sharedMesh = cachedMesh;
-
-		var mr = go.AddComponent<MeshRenderer>();
-		mr.sharedMaterial = isWindow ? glassMaterial : defaultMat;
-
-		return go;
-	}
-	// Computes a fast but stable hash describing *this* wall's layout
-	public int ComputeFingerprint()
-	{
-		unchecked
-		{
-			int hash = 17;
-			hash = hash * 31 + numRows;
-			hash = hash * 31 + numColumns;
-
-			for (int i = 0; i < wallGrid.Count; ++i)
-			{
-				WallPiece p = wallGrid[i];
-
-				// treat “hole” and “proxy” the same
-				if (p == null || p.isProxy) { hash = hash * 31; continue; }
-
-				int code = p.isWindow ? 2 :
-						   (p.cornerDesignation != WallPiece.TriangularCornerDesignation.None ? 3 : 1);
-
-				hash = hash * 31 + code;
-			}
-			return hash;
-		}
-	}
-
-	void OnEnable()
-	{
-		Undo.undoRedoPerformed -= OnUndoRedo;
-		Undo.undoRedoPerformed += OnUndoRedo;
-	}
-
-	void OnDisable()
-	{
-		Undo.undoRedoPerformed -= OnUndoRedo;
-	}
-
-	private void OnUndoRedo()
-	{
-		// pick your default here:
-		RelinkWallGridReferences();
-	}
-
-	private void SetupWallComponent(WallPiece wallComponent, Vector3 localCubePosition, int x, int y, bool isWindow)
-	{
-		// Record wall manager for wallGrid change
-		Undo.RecordObject(this, "Assign Wall Piece in Grid");
-		Mesh mesh = wallComponent.GetComponent<MeshFilter>()?.sharedMesh;
-
-		if (isWindow || mesh.bounds.size.z < 0.01f)
-		{
-			BoxCollider boxCollider = Undo.AddComponent<BoxCollider>(wallComponent.gameObject);
-		}
-		else
-		{
-			// Add MeshCollider with Undo so it can be removed on undo
-			MeshCollider meshCollider = Undo.AddComponent<MeshCollider>(wallComponent.gameObject);
-			meshCollider.convex = true;
-		}
-
-
-		// Cache original transform values
-		Vector3 localScale = wallComponent.transform.localScale;
-		Quaternion localRotation = wallComponent.transform.localRotation;
-
-		// Record transform changes for undo
-		Undo.RecordObject(wallComponent.transform, "Move Wall Component");
-
-		wallComponent.transform.SetParent(this.transform, true);
-		wallComponent.transform.localPosition = localCubePosition;
-		wallComponent.transform.localScale = localScale;
-		wallComponent.transform.localRotation = localRotation;
-
-		// Record WallPiece for undo before modifying its fields
-		Undo.RecordObject(wallComponent, "Update Wall Piece Data");
-		wallComponent.manager = this;
-		wallComponent.gridPosition = new Vector2Int(x, y);
-
-		// Remove old wall piece at this grid position (with Undo)
-		if (wallGrid[x + y * numColumns] != null && wallGrid[x + y * numColumns] != wallComponent)
-		{
-			Undo.DestroyObjectImmediate(wallGrid[x + y * numColumns].gameObject);
-		}
-
-		wallGrid[x + y * numColumns] = wallComponent;
-	}
-
-	public void CombineWall()
-	{
-		_chunks.RemoveAll(chunk => chunk == null);
-
-		for (int gx = 0; gx < numColumns; gx += numColumns / 2)
-		{
-			for (int gy = 0; gy < numRows; gy += numRows / 2)
-			{
-				BuildChunk(gx, gy);
 			}
 		}
-	}
-	// Called after undo/redo to re-link grid references
-	public void RelinkWallGridReferences()
-	{
-		// 1. Clear the grid
-		for (int i = 0; i < wallGrid.Count; i++)
-			wallGrid[i] = null;
-
-		// 2. Place chunk proxies first.
-		foreach (var chunk in _chunks)
+		// Called after undo/redo to re-link grid references
+		public void RelinkWallGridReferences()
 		{
-			if (chunk == null) continue;
-			WallPiece proxy = chunk.gameObject.GetComponent<WallPiece>();
-			if (proxy == null) continue;
+			// 1. Clear the grid
+			for (int i = 0; i < wallGrid.Count; i++)
+				wallGrid[i] = null;
 
-			foreach (var original in chunk.wallPieces)
+			// 2. Place chunk proxies first.
+			foreach (var chunk in _chunks)
 			{
-				if (original == null) continue;
-				var wp = original.GetComponent<WallPiece>();
-				if (wp == null) continue;
+				if (chunk == null) continue;
+				WallPiece proxy = chunk.gameObject.GetComponent<WallPiece>();
+				if (proxy == null) continue;
+
+				foreach (var original in chunk.wallPieces)
+				{
+					if (original == null) continue;
+					var wp = original.GetComponent<WallPiece>();
+					if (wp == null) continue;
+					var pos = wp.gridPosition;
+					int idx = pos.x + pos.y * numColumns;
+					if (pos.x >= 0 && pos.x < numColumns && pos.y >= 0 && pos.y < numRows)
+						wallGrid[idx] = proxy;
+				}
+			}
+
+			// 3. Place loose/real wallPieces in slots not already filled.
+			foreach (var wp in GetComponentsInChildren<WallPiece>(true))
+			{
+				if (wp.isProxy) continue; // skip chunk proxies
+
 				var pos = wp.gridPosition;
 				int idx = pos.x + pos.y * numColumns;
 				if (pos.x >= 0 && pos.x < numColumns && pos.y >= 0 && pos.y < numRows)
+				{
+					// Only set if nothing (i.e., not a proxy) is already in this grid slot.
+					if (wallGrid[idx] == null)
+						wallGrid[idx] = wp;
+				}
+			}
+		}
+
+		void BuildChunk(int startX, int startY)
+		{
+			var windowSet = new HashSet<WallPiece>();
+			var nonWindowSet = new HashSet<WallPiece>();
+
+			// Separate wall pieces into two categories
+			for (int x = startX; x < Mathf.Min(startX + numColumns / 2, numColumns); x++)
+			{
+				for (int y = startY; y < Mathf.Min(startY + numRows / 2, numRows); y++)
+				{
+					var piece = wallGrid[x + y * numColumns];
+					if (piece == null) continue;
+
+					// Undo: Record state before hiding
+					Undo.RecordObject(piece.gameObject, "Hide WallPiece in Hierarchy");
+					piece.gameObject.hideFlags = HideFlags.HideInHierarchy;
+					EditorUtility.SetDirty(piece.gameObject);
+
+					if (piece.isWindow)
+					{
+						windowSet.Add(piece);
+					}
+					else
+					{
+						nonWindowSet.Add(piece);
+					}
+				}
+			}
+
+			// Process window groups
+			foreach (var group in GetConnectedGroups(windowSet))
+				CreateChunkFromGroup(group, $"window_chunk_{startX}_{startY}", true);
+
+			// Process non-window groups
+			foreach (var group in GetConnectedGroups(nonWindowSet))
+				CreateChunkFromGroup(group, $"chunk_{startX}_{startY}", false);
+		}
+
+		void CreateChunkFromGroup(List<WallPiece> group, string namePrefix, bool isWindow)
+		{
+			if (group.Count == 0) return;
+
+			int chunkIdx = _chunks.Count;
+			int fp = _lastWallFingerprint;
+			List<GameObject> pieces = group.Select(p => p.gameObject).ToList();
+
+			GameObject combinedGO;
+
+			// FAST PATH — load pre-cached chunk mesh
+			Mesh cachedMesh = MeshCacheUtility.TryLoadChunk(fp, chunkIdx);
+			if (cachedMesh != null)
+			{
+				combinedGO = new GameObject($"{namePrefix}_{chunkIdx}");
+				Undo.RegisterCreatedObjectUndo(combinedGO, "Create Cached Wall Chunk");
+
+				combinedGO.transform.SetParent(this.transform, false);
+				combinedGO.transform.localPosition = Vector3.zero;
+				combinedGO.transform.localRotation = Quaternion.identity;
+
+				var mf = Undo.AddComponent<MeshFilter>(combinedGO);
+				mf.sharedMesh = cachedMesh;
+
+				var mr = Undo.AddComponent<MeshRenderer>(combinedGO);
+				mr.sharedMaterial = isWindow ? glassMaterial : wallMaterial;
+
+				foreach (var piece in pieces)
+					MeshCombinerUtility.PreparePieceForCombination(piece);
+			}
+			else
+			{
+				// SLOW PATH — combine, then cache
+				combinedGO = MeshCombinerUtility.CombineMeshes(
+					this.gameObject, pieces.ToArray(), $"{namePrefix}_{chunkIdx}");
+
+				Undo.RegisterCreatedObjectUndo(combinedGO, "Create Combined Wall Chunk");
+
+				var mfNew = combinedGO.GetComponent<MeshFilter>();
+				if (mfNew && mfNew.sharedMesh)
+				{
+					mfNew.sharedMesh = MeshCacheUtility.PersistChunk(mfNew.sharedMesh, fp, chunkIdx);
+				}
+			}
+
+
+			// ─────────────────────────────────────────────────────────────
+			// COLLIDERS
+			if (isWindow)
+			{
+				BoxCollider windowCollider = Undo.AddComponent<BoxCollider>(combinedGO);
+				Vector3 original = windowCollider.size;
+				windowCollider.size = new Vector3(original.x, original.y, worldWallSize.z * 2);
+			}
+			else
+			{
+				Undo.AddComponent<MeshCollider>(combinedGO);
+			}
+
+			BoxCollider trigger = Undo.AddComponent<BoxCollider>(combinedGO);
+			Vector3 boxSize = trigger.size;
+			trigger.size = new Vector3(boxSize.x * 0.7f, boxSize.y * 0.7f, boxSize.z);
+			trigger.isTrigger = true;
+
+			// ─────────────────────────────────────────────────────────────
+			// CHUNK COMPONENT
+			var chunk = Undo.AddComponent<Chunk>(combinedGO);
+			chunk.wallPieces = pieces;
+			chunk.wallManager = this;
+			chunk.structuralGroup = structuralGroup;
+			_chunks.Add(chunk);
+
+			// PROXY WALLPIECE (marker for chunk)
+			WallPiece proxy = Undo.AddComponent<WallPiece>(combinedGO);
+			proxy.isProxy = true;
+			proxy.chunk = chunk;
+			proxy.isWindow = isWindow;
+
+			// ─────────────────────────────────────────────────────────────
+			// Assign proxy to all grid cells originally covered
+			foreach (var original in group)
+			{
+				Vector2Int pos = original.gridPosition;
+				if (pos.x >= 0 && pos.x < numColumns && pos.y >= 0 && pos.y < numRows)
+				{
+					int idx = pos.x + pos.y * numColumns;
+					Undo.RecordObject(this, "Assign Wall Proxy Piece");
 					wallGrid[idx] = proxy;
-			}
-		}
-
-		// 3. Place loose/real wallPieces in slots not already filled.
-		foreach (var wp in GetComponentsInChildren<WallPiece>(true))
-		{
-			if (wp.isProxy) continue; // skip chunk proxies
-
-			var pos = wp.gridPosition;
-			int idx = pos.x + pos.y * numColumns;
-			if (pos.x >= 0 && pos.x < numColumns && pos.y >= 0 && pos.y < numRows)
-			{
-				// Only set if nothing (i.e., not a proxy) is already in this grid slot.
-				if (wallGrid[idx] == null)
-					wallGrid[idx] = wp;
-			}
-		}
-	}
-
-	void BuildChunk(int startX, int startY)
-	{
-		var windowSet = new HashSet<WallPiece>();
-		var nonWindowSet = new HashSet<WallPiece>();
-
-		// Separate wall pieces into two categories
-		for (int x = startX; x < Mathf.Min(startX + numColumns / 2, numColumns); x++)
-		{
-			for (int y = startY; y < Mathf.Min(startY + numRows / 2, numRows); y++)
-			{
-				var piece = wallGrid[x + y * numColumns];
-				if (piece == null) continue;
-
-				// Undo: Record state before hiding
-				Undo.RecordObject(piece.gameObject, "Hide WallPiece in Hierarchy");
-				piece.gameObject.hideFlags = HideFlags.HideInHierarchy;
-				EditorUtility.SetDirty(piece.gameObject);
-
-				if (piece.isWindow)
-				{
-					windowSet.Add(piece);
-				}
-				else
-				{
-					nonWindowSet.Add(piece);
 				}
 			}
 		}
-
-		// Process window groups
-		foreach (var group in GetConnectedGroups(windowSet))
-			CreateChunkFromGroup(group, $"window_chunk_{startX}_{startY}", true);
-
-		// Process non-window groups
-		foreach (var group in GetConnectedGroups(nonWindowSet))
-			CreateChunkFromGroup(group, $"chunk_{startX}_{startY}", false);
-	}
-
-	void CreateChunkFromGroup(List<WallPiece> group, string namePrefix, bool isWindow)
-	{
-		if (group.Count == 0) return;
-
-		var pieces = group.Select(p => p.gameObject).ToList();
-
-		// Undo: Register the creation of the combined GameObject
-		GameObject combinedGO = MeshCombinerUtility.CombineMeshes(
-			this.gameObject, pieces.ToArray(),
-			$"{namePrefix}_{_chunks.Count}");
-
-		Undo.RegisterCreatedObjectUndo(combinedGO, "Create Combined Wall Chunk");
-
-		if (isWindow)
-		{
-			BoxCollider windowCollider = Undo.AddComponent<BoxCollider>(combinedGO);
-			Vector3 originalWindowColliderSize = windowCollider.size;
-			windowCollider.size = new Vector3(
-				originalWindowColliderSize.x,
-				originalWindowColliderSize.y,
-				worldWallSize.z * 2
-			);
-		}
-		else
-			Undo.AddComponent<MeshCollider>(combinedGO);
-
-		BoxCollider box = Undo.AddComponent<BoxCollider>(combinedGO);
-
-		Vector3 originalSize = box.size;
-		box.size = new Vector3(
-			originalSize.x * 0.7f,
-			originalSize.y * 0.7f,
-			originalSize.z
-		);
-
-		box.isTrigger = true;
-
-		// Undo: Add Chunk component with Undo
-		var chunk = Undo.AddComponent<Chunk>(combinedGO);
-		chunk.wallPieces = pieces;
-		chunk.wallManager = this;
-		chunk.structuralGroup = structuralGroup;
-		_chunks.Add(chunk);
-
-		// Undo: Add WallPiece proxy component
-		WallPiece proxyPiece = Undo.AddComponent<WallPiece>(combinedGO);
-		proxyPiece.isProxy = true;
-		proxyPiece.chunk = chunk;
-		proxyPiece.isWindow = isWindow;
-
-		foreach (var original in group)
-		{
-			var pos = original.gridPosition;
-			if (pos.x >= 0 && pos.x < numColumns && pos.y >= 0 && pos.y < numRows)
-			{
-				int idx = pos.x + pos.y * numColumns;
-
-				// Undo: Record assignment
-				Undo.RecordObject(this, "Assign Wall Proxy Piece");
-				wallGrid[idx] = proxyPiece;
-			}
-		}
-
-	}
 
 #endif
 	}

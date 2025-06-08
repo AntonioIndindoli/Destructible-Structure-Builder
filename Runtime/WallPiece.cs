@@ -24,7 +24,7 @@ namespace Mayuns.DSB
         }
         [SerializeField] public TriangularCornerDesignation cornerDesignation = TriangularCornerDesignation.None;
         [SerializeField] public bool isWindow;
-
+        [SerializeField] public bool isEmpty;
         public void DestroyWallPiece()
         {
             TakeDamage(manager.wallPieceHealth);

@@ -698,13 +698,6 @@ namespace Mayuns.DSB.Editor
 
             wall.BuildWall(wall.wallGrid, true, buildSettings);
 
-            // Cache wall if not already present in cache
-            int fp = wall.ComputeFingerprint();
-            if (!buildSettings.TryGetWallMesh(fp, out var hit))
-            {
-                wall.CacheWall(buildSettings);
-            }
-
             EditorUtility.SetDirty(wall);
         }
 

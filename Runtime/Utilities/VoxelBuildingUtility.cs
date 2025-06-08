@@ -1,4 +1,4 @@
-using UnityEngine; 
+using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.Rendering;
 
@@ -457,10 +457,10 @@ namespace Mayuns.DSB
             uvs[11] = UvTop(x, y + 1, z + 1);
 
             // BOTTOM face 
-            uvs[12] = UvBottom(x, y, z + 1);
-            uvs[13] = UvBottom(x + 1, y, z + 1);
-            uvs[14] = UvBottom(x + 1, y, z);
-            uvs[15] = UvBottom(x, y, z);
+            uvs[12] = UvBottom(x, y, z);
+            uvs[13] = UvBottom(x + 1, y, z);
+            uvs[14] = UvBottom(x + 1, y, z + 1);
+            uvs[15] = UvBottom(x, y, z + 1);
 
             // LEFT face
             uvs[16] = UvLeft(x, y, z);

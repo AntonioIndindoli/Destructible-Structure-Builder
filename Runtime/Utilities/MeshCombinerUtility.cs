@@ -29,25 +29,7 @@ namespace Mayuns.DSB
                 };
                 materialGroups[mat].Add(ci);
 
-                WallPiece wallPiece = piece.GetComponent<WallPiece>();
-                MemberPiece memberPiece = piece.GetComponent<MemberPiece>();
-                if (wallPiece != null)
-                {
-                    if (wallPiece.isWindow)
-                    {
-                        wallPiece.CreateAndStoreDebrisData(1, true);
-                    }
-                    else
-                    {
-                        wallPiece.CreateAndStoreDebrisData(1, false);
-                    }
-                }
-                else if (memberPiece != null)
-                {
-                    memberPiece.CreateAndStoreDebrisData(1, false);
-                }
-
-                piece.SetActive(false);
+                PreparePieceForCombination(piece);
             }
 
             List<CombineInstance> finalCombines = new();
@@ -79,5 +61,25 @@ namespace Mayuns.DSB
 
             return combinedObject;
         }
+        public static void PreparePieceForCombination(GameObject piece)
+        {
+            if (piece == null) return;
+
+            WallPiece wallPiece = piece.GetComponent<WallPiece>();
+            MemberPiece memberPiece = piece.GetComponent<MemberPiece>();
+
+            if (wallPiece != null)
+            {
+                bool isWindow = wallPiece.isWindow;
+                wallPiece.CreateAndStoreDebrisData(1, isWindow);
+            }
+            else if (memberPiece != null)
+            {
+                memberPiece.CreateAndStoreDebrisData(1, false);
+            }
+
+            piece.SetActive(false);
+        }
+
     }
 }

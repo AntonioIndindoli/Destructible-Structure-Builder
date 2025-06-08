@@ -395,17 +395,17 @@ namespace Mayuns.DSB
 #if UNITY_EDITOR
 		public void BuildMember()
 		{
-		// ────────────────────────────────────────────────────────────────────────────
-		// 1) Wrap everything in ONE undo group
-		// ────────────────────────────────────────────────────────────────────────────
-		int undoGroup = -1;
-		if (!Application.isPlaying)
-		{
-			Undo.IncrementCurrentGroup();
-			Undo.SetCurrentGroupName("Rebuild Structural Member Voxels");
-			undoGroup = Undo.GetCurrentGroup();
-			Undo.RecordObject(this, "Rebuild Structural Member");   // length etc. may change
-		}
+			// ────────────────────────────────────────────────────────────────────────────
+			// 1) Wrap everything in ONE undo group
+			// ────────────────────────────────────────────────────────────────────────────
+			int undoGroup = -1;
+			if (!Application.isPlaying)
+			{
+				Undo.IncrementCurrentGroup();
+				Undo.SetCurrentGroupName("Rebuild Structural Member Voxels");
+				undoGroup = Undo.GetCurrentGroup();
+				Undo.RecordObject(this, "Rebuild Structural Member");   // length etc. may change
+			}
 
 
 			//──────────────────────────────────────────────────────────────────────────────
@@ -415,11 +415,11 @@ namespace Mayuns.DSB
 			{
 				for (int i = 0; i < memberPieces.Length; i++)
 				{
-				if (!Application.isPlaying && memberPieces[i])
-					Undo.DestroyObjectImmediate(memberPieces[i]);
-				else
+					if (!Application.isPlaying && memberPieces[i])
+						Undo.DestroyObjectImmediate(memberPieces[i]);
+					else
 
-					if (memberPieces[i])
+						if (memberPieces[i])
 						DestroyImmediate(memberPieces[i]);
 
 					memberPieces[i] = null;
@@ -467,6 +467,7 @@ namespace Mayuns.DSB
 			//──────────────────────────────────────────────────────────────────────────────
 			// 4) Create voxels – every new object/component registered with Undo
 			//──────────────────────────────────────────────────────────────────────────────
+			int fp = memberDivisionsCount;
 			for (int z = 0; z < memberDivisionsCount; z++)
 			{
 				Vector3 localCubePosition = new(
@@ -476,29 +477,50 @@ namespace Mayuns.DSB
 
 				Vector3 worldCubePosition = transform.TransformPoint(localCubePosition);
 
-				// Create cube (your utility can remain unchanged)
-				GameObject cube = VoxelBuildingUtility.CreateIrregularCube(
-					cubeSize,
-					worldCubePosition,
-					0, 0, z,
-					originalMaterial,
-					cubeSize, vertexOffsets,
-					worldMemberSize,
-					1, 1, memberDivisionsCount,
-					"StructuralMemberVoxel");
+				int idx = z;   // 1‑D index for member cells
 
-			if (!Application.isPlaying)
-			{
-				// tell Undo about the fresh GameObject
-				Undo.RegisterCreatedObjectUndo(cube, "Create StructuralMemberVoxel");
-				Undo.RecordObject(cube.transform, "Position StructuralMemberVoxel");
-			}
+				/*──── FAST PATH : load cached mesh ────*/
+				Mesh cached = MeshCacheUtility.TryLoad(fp, idx);
+				GameObject cube;
+
+				if (cached)
+				{
+					cube = new GameObject($"StructuralMemberVoxel_{z}");
+					cube.transform.SetPositionAndRotation(worldCubePosition, Quaternion.identity);
+					cube.transform.localScale = new(1f, 1f, 1f / memberDivisionsCount);
+
+					var mf = cube.AddComponent<MeshFilter>();
+					mf.sharedMesh = cached;
+
+					var mr2 = cube.AddComponent<MeshRenderer>();
+					mr2.sharedMaterial = originalMaterial;
+				}
+				else
+				{
+					/*──── SLOW PATH : procedural build ────*/
+					cube = VoxelBuildingUtility.CreateIrregularCube(
+						 cubeSize, worldCubePosition, 0, 0, z,
+						 originalMaterial, cubeSize, vertexOffsets,
+						 worldMemberSize, 1, 1, memberDivisionsCount,
+						 "StructuralMemberVoxel");
+
+					MeshFilter mf = cube.GetComponent<MeshFilter>();
+					if (mf && mf.sharedMesh)
+						mf.sharedMesh = MeshCacheUtility.Persist(mf.sharedMesh, fp, idx);
+				}
+
+				if (!Application.isPlaying)
+				{
+					// tell Undo about the fresh GameObject
+					Undo.RegisterCreatedObjectUndo(cube, "Create StructuralMemberVoxel");
+					Undo.RecordObject(cube.transform, "Position StructuralMemberVoxel");
+				}
 
 
 				// add collider via Undo
-			MeshCollider meshCol = !Application.isPlaying
-				? Undo.AddComponent<MeshCollider>(cube)
-				: cube.AddComponent<MeshCollider>();
+				MeshCollider meshCol = !Application.isPlaying
+					? Undo.AddComponent<MeshCollider>(cube)
+					: cube.AddComponent<MeshCollider>();
 
 
 				meshCol.convex = true;
@@ -512,9 +534,9 @@ namespace Mayuns.DSB
 
 
 				// MemberPiece component
-			MemberPiece piece = !Application.isPlaying
-				? Undo.AddComponent<MemberPiece>(cube)
-				: cube.AddComponent<MemberPiece>();
+				MemberPiece piece = !Application.isPlaying
+					? Undo.AddComponent<MemberPiece>(cube)
+					: cube.AddComponent<MemberPiece>();
 
 
 				piece.member = this;
@@ -528,20 +550,20 @@ namespace Mayuns.DSB
 			MeshRenderer mr = GetComponent<MeshRenderer>();
 			if (mr)
 			{
-			if (!Application.isPlaying) Undo.RecordObject(mr, "Hide member shell");
+				if (!Application.isPlaying) Undo.RecordObject(mr, "Hide member shell");
 
 				mr.enabled = false;
 			}
 
-		//──────────────────────────────────────────────────────────────────────────────
-		// 6) Dirty the object & scene, then collapse/group the whole operation
-		//──────────────────────────────────────────────────────────────────────────────
-		if (!Application.isPlaying)
-		{
-			EditorUtility.SetDirty(this);
-			EditorSceneManager.MarkSceneDirty(gameObject.scene);
-			Undo.CollapseUndoOperations(undoGroup);
-		}
+			//──────────────────────────────────────────────────────────────────────────────
+			// 6) Dirty the object & scene, then collapse/group the whole operation
+			//──────────────────────────────────────────────────────────────────────────────
+			if (!Application.isPlaying)
+			{
+				EditorUtility.SetDirty(this);
+				EditorSceneManager.MarkSceneDirty(gameObject.scene);
+				Undo.CollapseUndoOperations(undoGroup);
+			}
 
 		}
 #endif

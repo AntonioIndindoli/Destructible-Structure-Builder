@@ -96,7 +96,7 @@ namespace Mayuns.DSB
                 WallManager[] wallsArray = GetComponentsInChildren<WallManager>();
                 wallsHash = new HashSet<WallManager>(wallsArray);
 
-                UpdateCurrentMinDistancesToGround();
+                UpdateCurrentMinDistancesToGround(true);
                 PropagateStructuralLoads(true);
             }
         }
@@ -111,7 +111,7 @@ namespace Mayuns.DSB
         {
             if (!isDetached)
             {
-                UpdateCurrentMinDistancesToGround();
+                UpdateCurrentMinDistancesToGround(false);
                 PropagateStructuralLoads(false);
             }
             else
@@ -181,7 +181,7 @@ namespace Mayuns.DSB
                     CreateMemberGroup(comp);
         }
 
-        private void UpdateCurrentMinDistancesToGround()
+        private void UpdateCurrentMinDistancesToGround(bool isInitial)
         {
             // Identify all ground Members in structuralMembersHash
             var groundMembers = structuralMembersHash.Where(Member => Member.isGrounded);
@@ -218,54 +218,57 @@ namespace Mayuns.DSB
                 }
             }
 
-            // Members not visited during BFS are not connected to ground Members
-            foreach (var Member in unvisitedMembers)
+            if (!isInitial)
             {
-                Member.currentMinDistanceToGround = int.MaxValue;
-            }
-
-            // Collect Members where currentMinDistanceToGround > maxDistance
-            HashSet<StructuralMember> disconnectedMembers = new HashSet<StructuralMember>();
-
-            foreach (var Member in unvisitedMembers)
-            {
-                if (Member != null && !Member.isDestroyed)
+                // Members not visited during BFS are not connected to ground Members
+                foreach (var Member in unvisitedMembers)
                 {
-                    structuralMembersHash.Remove(Member);
-                    disconnectedMembers.Add(Member);
+                    Member.currentMinDistanceToGround = int.MaxValue;
                 }
-            }
 
-            HashSet<StructuralMember> unprocessed = new HashSet<StructuralMember>(disconnectedMembers);
-            while (unprocessed.Count > 0)
-            {
-                StructuralMember seed = unprocessed.First();
-                // Create a new component set and a queue for BFS.
-                HashSet<StructuralMember> component = new HashSet<StructuralMember>();
-                Queue<StructuralMember> componentQueue = new Queue<StructuralMember>();
+                // Collect Members where currentMinDistanceToGround > maxDistance
+                HashSet<StructuralMember> disconnectedMembers = new HashSet<StructuralMember>();
 
-                componentQueue.Enqueue(seed);
-                component.Add(seed);
-                unprocessed.Remove(seed);
-
-                while (componentQueue.Count > 0)
+                foreach (var Member in unvisitedMembers)
                 {
-                    StructuralMember current = componentQueue.Dequeue();
-                    foreach (var adjacent in current.cachedAdjacentMembers)
+                    if (Member != null && !Member.isDestroyed)
                     {
-                        if (adjacent != null &&
-                            disconnectedMembers.Contains(adjacent) &&
-                            unprocessed.Contains(adjacent))
-                        {
-                            componentQueue.Enqueue(adjacent);
-                            component.Add(adjacent);
-                            unprocessed.Remove(adjacent);
-                        }
+                        structuralMembersHash.Remove(Member);
+                        disconnectedMembers.Add(Member);
                     }
                 }
 
-                // Create a new group for this connected component of disconnectedMembers.
-                CreateMemberGroup(component);
+                HashSet<StructuralMember> unprocessed = new HashSet<StructuralMember>(disconnectedMembers);
+                while (unprocessed.Count > 0)
+                {
+                    StructuralMember seed = unprocessed.First();
+                    // Create a new component set and a queue for BFS.
+                    HashSet<StructuralMember> component = new HashSet<StructuralMember>();
+                    Queue<StructuralMember> componentQueue = new Queue<StructuralMember>();
+
+                    componentQueue.Enqueue(seed);
+                    component.Add(seed);
+                    unprocessed.Remove(seed);
+
+                    while (componentQueue.Count > 0)
+                    {
+                        StructuralMember current = componentQueue.Dequeue();
+                        foreach (var adjacent in current.cachedAdjacentMembers)
+                        {
+                            if (adjacent != null &&
+                                disconnectedMembers.Contains(adjacent) &&
+                                unprocessed.Contains(adjacent))
+                            {
+                                componentQueue.Enqueue(adjacent);
+                                component.Add(adjacent);
+                                unprocessed.Remove(adjacent);
+                            }
+                        }
+                    }
+
+                    // Create a new group for this connected component of disconnectedMembers.
+                    CreateMemberGroup(component);
+                }
             }
         }
 
@@ -603,54 +606,54 @@ namespace Mayuns.DSB
         }
 
 #if UNITY_EDITOR
-    public void RebuildVoxels()
-    {
-        // Rebuild all walls
-        walls.RemoveAll(m => m == null);
-        foreach (var wall in walls)
+        public void RebuildVoxels()
         {
-            if (wall.wallGrid != null)
+            // Rebuild all walls
+            walls.RemoveAll(m => m == null);
+            foreach (var wall in walls)
             {
-                wall.InstantUncombine();
-                wall.RelinkWallGridReferences();
-                wall.BuildWall(wall.wallGrid, true, buildSettings);
-                UnityEditor.EditorUtility.SetDirty(wall);
-            }
-            else
-            {
-                Debug.LogWarning($"WallManager '{wall.name}' has no wallGrid to rebuild.");
-            }
-        }
-
-        // Rebuild all structural members
-        foreach (var member in structuralMembers)
-        {
-            if (member != null)
-            {
-                member.BuildMember();
-                UnityEditor.EditorUtility.SetDirty(member);
-
-            }
-        }
-    }
-
-    void OnDrawGizmosSelected()
-    {
-        // Draw for all currently validating walls
-        if (wallsHash != null)
-        {
-            foreach (var wall in wallsHash)
-            {
-                if (wall == null) continue;
-
-                if (wall.isValidating)
+                if (wall.wallGrid != null)
                 {
-                    Gizmos.color = Color.yellow;
-                    UnityEditor.Handles.Label(wall.transform.position + Vector3.up * 2f, "VALIDATING");
+                    wall.InstantUncombine();
+                    wall.RelinkWallGridReferences();
+                    wall.BuildWall(wall.wallGrid, true, buildSettings);
+                    UnityEditor.EditorUtility.SetDirty(wall);
+                }
+                else
+                {
+                    Debug.LogWarning($"WallManager '{wall.name}' has no wallGrid to rebuild.");
+                }
+            }
+
+            // Rebuild all structural members
+            foreach (var member in structuralMembers)
+            {
+                if (member != null)
+                {
+                    member.BuildMember();
+                    UnityEditor.EditorUtility.SetDirty(member);
+
                 }
             }
         }
-    }
+
+        void OnDrawGizmosSelected()
+        {
+            // Draw for all currently validating walls
+            if (wallsHash != null)
+            {
+                foreach (var wall in wallsHash)
+                {
+                    if (wall == null) continue;
+
+                    if (wall.isValidating)
+                    {
+                        Gizmos.color = Color.yellow;
+                        UnityEditor.Handles.Label(wall.transform.position + Vector3.up * 2f, "VALIDATING");
+                    }
+                }
+            }
+        }
 #endif
     }
 }

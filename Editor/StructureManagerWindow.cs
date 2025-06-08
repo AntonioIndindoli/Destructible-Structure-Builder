@@ -493,6 +493,8 @@ namespace Mayuns.DSB.Editor
 
             EditorGUILayout.Space(15);
             EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+            DrawMeshCacheSettings();
+
             GUILayout.Label("Runtime Debris Settings", EditorStyles.boldLabel);
             DrawGibManagerSettings();
 
@@ -650,6 +652,40 @@ namespace Mayuns.DSB.Editor
             Selection.activeObject = settings;
             EditorGUIUtility.PingObject(settings);
         }
+
+        // ──────────────────────────────────────────────────────────────────────────
+        //  Mesh‑cache UI (toggle + folder picker)
+        // ──────────────────────────────────────────────────────────────────────────
+        void DrawMeshCacheSettings()
+        {
+            GUILayout.Label("Mesh Cache", EditorStyles.boldLabel);
+
+            // Enable / disable caching
+            bool enabled = MeshCacheUtility.Enabled;
+            bool newEnabled = EditorGUILayout.Toggle("Enable Mesh Cache", enabled);
+            if (newEnabled != enabled)
+                MeshCacheUtility.SetEnabled(newEnabled);
+
+            // Folder controls (disabled when cache off)
+            using (new EditorGUI.DisabledScope(!newEnabled))
+            {
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel("Cache Folder");
+
+                string folder = MeshCacheUtility.CachePath;
+                EditorGUILayout.LabelField(string.IsNullOrEmpty(folder) ? "(default)" : folder,
+                                           GUILayout.MaxHeight(EditorGUIUtility.singleLineHeight));
+
+                if (GUILayout.Button("Change...", GUILayout.Width(80)))
+                    MeshCacheUtility.PickFolder();
+
+                EditorGUILayout.EndHorizontal();
+            }
+
+            EditorGUILayout.Space(4);
+            EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+        }
+
 
     }
 }
