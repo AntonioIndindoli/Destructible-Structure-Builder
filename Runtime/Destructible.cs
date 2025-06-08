@@ -62,7 +62,7 @@ namespace Mayuns.DSB
 
             foreach (DebrisData data in gibs)
             {
-                // Decide whether to spawn gibs are not
+                // Decide whether to spawn gibs or not
                 if (data.sharedMesh == null || data.sharedMesh.vertexCount == 0 || Random.value > spawnChance || gibManager == null)
                     continue;
 

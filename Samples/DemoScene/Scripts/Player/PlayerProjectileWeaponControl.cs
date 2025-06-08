@@ -22,7 +22,6 @@ public class PlayerProjectileWeaponControl : MonoBehaviour
     {
         if (projectilePrefab == null || muzzleTransform == null)
         {
-            Debug.LogWarning("Projectile prefab or muzzle not assigned.");
             return;
         }
 

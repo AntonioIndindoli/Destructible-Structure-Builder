@@ -72,7 +72,6 @@ namespace Mayuns.DSB
 				}
 				if (structuralGroup == null)
 				{
-					Debug.Log("Destructable piece spawned without StructuralGroupManager in parent. Deleting immediately.");
 					Destroy(gameObject);
 				}
 			}
@@ -432,7 +431,6 @@ namespace Mayuns.DSB
 			MeshFilter meshFilter = GetComponent<MeshFilter>();
 			if (!meshFilter)
 			{
-				Debug.LogError("The GameObject must have a MeshFilter component.");
 				return;
 			}
 

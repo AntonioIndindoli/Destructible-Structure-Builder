@@ -619,10 +619,6 @@ namespace Mayuns.DSB
                     wall.BuildWall(wall.wallGrid, true, buildSettings);
                     UnityEditor.EditorUtility.SetDirty(wall);
                 }
-                else
-                {
-                    Debug.LogWarning($"WallManager '{wall.name}' has no wallGrid to rebuild.");
-                }
             }
 
             // Rebuild all structural members

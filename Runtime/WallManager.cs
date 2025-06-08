@@ -55,7 +55,6 @@ namespace Mayuns.DSB
 			}
 			if (structuralGroup == null)
 			{
-				Debug.Log("Destructable piece spawned without StructuralGroupManager in parent. Deleting immediately.");
 				Destroy(gameObject);
 			}
 
@@ -781,7 +780,7 @@ namespace Mayuns.DSB
 
 			/*–––– basic data from the source mesh –––––*/
 			MeshFilter mfRoot = GetComponent<MeshFilter>();
-			if (!mfRoot) { Debug.LogError("Wall needs a MeshFilter"); return; }
+			if (!mfRoot) { return; }
 
 			Mesh srcMesh = mfRoot.sharedMesh;
 			Material defaultMat = wallMaterial;

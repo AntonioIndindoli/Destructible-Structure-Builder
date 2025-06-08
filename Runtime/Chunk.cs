@@ -19,7 +19,6 @@ namespace Mayuns.DSB
 			}
 			if (structuralGroup == null)
 			{
-				Debug.LogError("Chunk needs StructuralGroupManager.", this);
 				Destroy(gameObject);
 			}
 		}
