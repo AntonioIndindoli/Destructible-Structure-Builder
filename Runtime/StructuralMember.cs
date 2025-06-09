@@ -28,16 +28,28 @@ namespace Mayuns.DSB
 		[ReadOnly] public float length;
 		[HideInInspector] public GameObject combinedObject;
 		[HideInInspector] public bool wasDamaged = false;
-		private int memberDivisionsCount = 5;
-		private float variationAmount = 0.25f;
-		private Vector3[,,] vertexOffsets;
-		private Vector3 worldMemberSize;
+                private int memberDivisionsCount = 5;
+                private float variationAmount = 0.25f;
+                private Vector3[,,] vertexOffsets;
+                private Vector3 worldMemberSize;
 		 public float mass = 10f;
 		 public float supportCapacity = 100f;
-                 public float accumulatedLoad = 0f;
+                public float accumulatedLoad = 0f;
                  public float memberPieceHealth = 100f;
                 [HideInInspector] public float textureScaleX = 1f;
                 [HideInInspector] public float textureScaleY = 1f;
+
+                int ComputeFingerprint()
+                {
+                        unchecked
+                        {
+                                int hash = 17;
+                                hash = hash * 31 + memberDivisionsCount;
+                                hash = hash * 31 + textureScaleX.GetHashCode();
+                                hash = hash * 31 + textureScaleY.GetHashCode();
+                                return hash;
+                        }
+                }
 
 #if UNITY_EDITOR
 		private void OnDrawGizmosSelected()
@@ -468,8 +480,8 @@ namespace Mayuns.DSB
 			//──────────────────────────────────────────────────────────────────────────────
 			// 4) Create voxels – every new object/component registered with Undo
 			//──────────────────────────────────────────────────────────────────────────────
-			int fp = memberDivisionsCount;
-			for (int z = 0; z < memberDivisionsCount; z++)
+                        int fp = ComputeFingerprint();
+                        for (int z = 0; z < memberDivisionsCount; z++)
 			{
 				Vector3 localCubePosition = new(
 					0,
