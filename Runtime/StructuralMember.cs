@@ -33,8 +33,10 @@ namespace Mayuns.DSB
 		[field: SerializeField, HideInInspector] private Vector3 worldMemberSize;
 		[field: SerializeField] public float mass = 10f;
 		[field: SerializeField] public float supportCapacity = 100f;
-		[field: SerializeField] public float accumulatedLoad = 0f;
-		[field: SerializeField] public float memberPieceHealth = 100f;
+                [field: SerializeField] public float accumulatedLoad = 0f;
+                [field: SerializeField] public float memberPieceHealth = 100f;
+                [field: SerializeField, HideInInspector] public float textureScaleX = 1f;
+                [field: SerializeField, HideInInspector] public float textureScaleY = 1f;
 
 #if UNITY_EDITOR
 		private void OnDrawGizmosSelected()
@@ -496,11 +498,13 @@ namespace Mayuns.DSB
 				else
 				{
 					/*──── SLOW PATH : procedural build ────*/
-					cube = VoxelBuildingUtility.CreateIrregularCube(
-						 cubeSize, worldCubePosition, 0, 0, z,
-						 originalMaterial, cubeSize, vertexOffsets,
-						 worldMemberSize, 1, 1, memberDivisionsCount,
-						 "StructuralMemberVoxel");
+                                        cube = VoxelBuildingUtility.CreateIrregularCube(
+                                                 cubeSize, worldCubePosition, 0, 0, z,
+                                                 originalMaterial, cubeSize, vertexOffsets,
+                                                 worldMemberSize, 1, 1,
+                                                 new Vector2(textureScaleX, textureScaleY),
+                                                 memberDivisionsCount,
+                                                 "StructuralMemberVoxel");
 
 					MeshFilter mf = cube.GetComponent<MeshFilter>();
 					if (mf && mf.sharedMesh)

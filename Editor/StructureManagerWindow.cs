@@ -216,6 +216,11 @@ namespace Mayuns.DSB.Editor
                 StructureBuildTool.selectedMaterialToApply = (Material)EditorGUILayout.ObjectField(
                     "Material to Apply", StructureBuildTool.selectedMaterialToApply, typeof(Material), false);
 
+                buildSettings.memberTextureScaleX = EditorGUILayout.FloatField("Member Texture Scale X", buildSettings.memberTextureScaleX);
+                buildSettings.memberTextureScaleY = EditorGUILayout.FloatField("Member Texture Scale Y", buildSettings.memberTextureScaleY);
+                buildSettings.wallTextureScaleX = EditorGUILayout.FloatField("Wall Texture Scale X", buildSettings.wallTextureScaleX);
+                buildSettings.wallTextureScaleY = EditorGUILayout.FloatField("Wall Texture Scale Y", buildSettings.wallTextureScaleY);
+
                 if (StructureBuildTool.selectedMaterialToApply == null)
                 {
                     EditorGUILayout.HelpBox("Please select a Material to apply.", MessageType.Info);
@@ -296,19 +301,26 @@ namespace Mayuns.DSB.Editor
                 // ------------- MATERIALS ------------
                 var oldWallMat = buildSettings.wallMaterial;
                 var oldGlassMat = buildSettings.glassMaterial;
+                float oldScaleX = buildSettings.wallTextureScaleX;
+                float oldScaleY = buildSettings.wallTextureScaleY;
 
                 buildSettings.wallMaterial = (Material)EditorGUILayout.ObjectField("Wall Material", buildSettings.wallMaterial, typeof(Material), false);
                 buildSettings.glassMaterial = (Material)EditorGUILayout.ObjectField("Wall Glass Material", buildSettings.glassMaterial, typeof(Material), false);
+                buildSettings.wallTextureScaleX = EditorGUILayout.FloatField("Wall Texture Scale X", buildSettings.wallTextureScaleX);
+                buildSettings.wallTextureScaleY = EditorGUILayout.FloatField("Wall Texture Scale Y", buildSettings.wallTextureScaleY);
 
                 bool materialChanged = oldWallMat != buildSettings.wallMaterial || oldGlassMat != buildSettings.glassMaterial;
+                bool scaleChanged = !Mathf.Approximately(oldScaleX, buildSettings.wallTextureScaleX) || !Mathf.Approximately(oldScaleY, buildSettings.wallTextureScaleY);
 
                 // ------------------------------------
                 // queue the heavy rebuild (outside GUI pass)
-                if (sizeChanged || materialChanged)
+                if (sizeChanged || materialChanged || scaleChanged)
                 {
                     // keep globals in sync
                     StructureBuildTool.buildSettings.wallMaterial = buildSettings.wallMaterial;
                     StructureBuildTool.buildSettings.glassMaterial = buildSettings.glassMaterial;
+                    StructureBuildTool.buildSettings.wallTextureScaleX = buildSettings.wallTextureScaleX;
+                    StructureBuildTool.buildSettings.wallTextureScaleY = buildSettings.wallTextureScaleY;
 
                     StructureBuildTool.RequestWallRefresh(
                         sizeChanged ? newCols : (int?)null,
@@ -584,6 +596,8 @@ namespace Mayuns.DSB.Editor
             buildSettings.memberThickness = EditorGUILayout.FloatField("Member Thickness", buildSettings.memberThickness);
             buildSettings.memberMass = EditorGUILayout.FloatField("Member Mass", buildSettings.memberMass);
             buildSettings.memberPieceHealth = EditorGUILayout.FloatField("Member Piece Health", buildSettings.memberPieceHealth);
+            buildSettings.memberTextureScaleX = EditorGUILayout.FloatField("Member Texture Scale X", buildSettings.memberTextureScaleX);
+            buildSettings.memberTextureScaleY = EditorGUILayout.FloatField("Member Texture Scale Y", buildSettings.memberTextureScaleY);
             buildSettings.memberSupportCapacity = EditorGUILayout.FloatField("Member Support Capacity", buildSettings.memberSupportCapacity);
             buildSettings.memberMaterial = (Material)EditorGUILayout.ObjectField("Member Material", buildSettings.memberMaterial, typeof(Material), false);
             buildSettings.disableDirection = (DisableDirection)EditorGUILayout.EnumPopup("Disable Direction", buildSettings.disableDirection);
@@ -613,6 +627,8 @@ namespace Mayuns.DSB.Editor
             buildSettings.wallPieceMass = EditorGUILayout.FloatField("Wall Piece Mass", buildSettings.wallPieceMass);
             buildSettings.wallPieceHealth = EditorGUILayout.FloatField("Wall Piece Health", buildSettings.wallPieceHealth);
             buildSettings.wallPieceWindowHealth = EditorGUILayout.FloatField("Window Piece Health", buildSettings.wallPieceWindowHealth);
+            buildSettings.wallTextureScaleX = EditorGUILayout.FloatField("Wall Texture Scale X", buildSettings.wallTextureScaleX);
+            buildSettings.wallTextureScaleY = EditorGUILayout.FloatField("Wall Texture Scale Y", buildSettings.wallTextureScaleY);
 
             EditorGUIUtility.labelWidth = originalLabelWidth;
         }
