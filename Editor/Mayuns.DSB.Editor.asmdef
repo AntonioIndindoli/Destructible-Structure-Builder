@@ -1,0 +1,9 @@
+{
+  "name": "Mayuns.DSB.Editor",
+  "references": [
+    "GUID:cd159c4da2776f743b9302fe8e3ee7aa"   
+  ],
+  "includePlatforms": [ "Editor" ],   
+  "excludePlatforms": [],             
+  "autoReferenced": true
+}
