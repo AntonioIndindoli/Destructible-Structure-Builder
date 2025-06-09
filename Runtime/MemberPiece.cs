@@ -4,9 +4,10 @@ namespace Mayuns.DSB
 {
     public class MemberPiece : Destructible, IDamageable
     {
-        [field: SerializeField, HideInInspector] public bool isDestroyed = false;
-        [field: SerializeField, HideInInspector] public StructuralMember member;
-        [field: SerializeField] public float accumulatedDamage = 0;
+        [HideInInspector] public bool isDestroyed = false;
+        [HideInInspector] public StructuralMember member;
+        public float accumulatedDamage = 0;
+        // show member.memberPieceHealth in inspector along with accumulated damage somehow
         public void DestroyMemberPiece()
         {
             TakeDamage(member.memberPieceHealth);

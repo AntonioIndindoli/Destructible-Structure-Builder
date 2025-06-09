@@ -132,8 +132,8 @@ namespace Mayuns.DSB
     public class StructuralConnection : Destructible, IDamageable
     {
         [field: SerializeField, HideInInspector] MemberMap _members = new();
-        [field: SerializeField, HideInInspector] public StructuralGroupManager structuralGroup;
-        [field: SerializeField, HideInInspector] public bool isDestroyed;
+        [HideInInspector] public StructuralGroupManager structuralGroup;
+        [HideInInspector] public bool isDestroyed;
         public float health = 100f;
 
         void Start() => CreateAndStoreDebrisData(1, false);

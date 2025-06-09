@@ -2,18 +2,17 @@ using UnityEngine;
 
 namespace Mayuns.DSB
 {
-    [System.Serializable]
     public class WallPiece : Destructible, IDamageable
     {
-        [field: SerializeField, HideInInspector] public bool isDestroyed = false;
-        [field: SerializeField, HideInInspector] public WallManager manager;
-        [field: SerializeField, HideInInspector] public StructuralMember attachedMember;
-        [field: SerializeField, HideInInspector] public MemberPiece closestMemberPiece;
-        [field: SerializeField, HideInInspector] public Vector2Int gridPosition;
-        [field: SerializeField, HideInInspector] public Chunk chunk;
-        [field: SerializeField, HideInInspector] public bool isEdge = false;
-        [field: SerializeField, HideInInspector] public bool isProxy = false;
-        [field: SerializeField, HideInInspector] public float accumulatedDamage = 0;
+        [HideInInspector] public bool isDestroyed = false;
+        [HideInInspector] public WallManager manager;
+        [HideInInspector] public StructuralMember attachedMember;
+        [HideInInspector] public MemberPiece closestMemberPiece;
+        [HideInInspector] public Vector2Int gridPosition;
+        [HideInInspector] public Chunk chunk;
+        [HideInInspector] public bool isEdge = false;
+        [HideInInspector] public bool isProxy = false;
+        [HideInInspector] public float accumulatedDamage = 0;
         public enum TriangularCornerDesignation
         {
             None,
@@ -22,9 +21,9 @@ namespace Mayuns.DSB
             BottomLeft,
             BottomRight
         }
-        [field: SerializeField, HideInInspector] public TriangularCornerDesignation cornerDesignation = TriangularCornerDesignation.None;
-        [field: SerializeField, HideInInspector] public bool isWindow;
-        [field: SerializeField, HideInInspector] public bool isEmpty;
+        [HideInInspector] public TriangularCornerDesignation cornerDesignation = TriangularCornerDesignation.None;
+        [HideInInspector] public bool isWindow;
+        [HideInInspector] public bool isEmpty;
         
         public void DestroyWallPiece()
         {

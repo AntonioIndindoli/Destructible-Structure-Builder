@@ -41,7 +41,7 @@ namespace Mayuns.DSB
         /*──────── shared low‑level APIs ───────────────────────────────*/
 
         /// <summary>Return cached mesh if present, otherwise null.</summary>
-        public static Mesh TryLoad(int fp, int idx)
+        public static Mesh TryLoadPiece(int fp, int idx)
         {
             if (!Enabled) return null;
             string p = $"{CachePath}/fp{fp}_cell{idx}.asset";
@@ -52,7 +52,7 @@ namespace Mayuns.DSB
         /// Persist <paramref name="src"/> under fp/idx and return the asset reference.
         /// If it already exists the old asset is reused.
         /// </summary>
-        public static Mesh Persist(Mesh src, int fp, int idx)
+        public static Mesh PersistPiece(Mesh src, int fp, int idx)
         {
             if (!Enabled || src == null) return src;
 

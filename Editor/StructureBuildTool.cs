@@ -1226,7 +1226,7 @@ namespace Mayuns.DSB.Editor
 
             memberGO.transform.localScale = isDiag
                 ? new Vector3(thickness, thickness, baseLength)
-                : new Vector3(thickness, thickness, baseLength - thickness);
+                : new Vector3(thickness, thickness, baseLength);
 
             if (selectedMemberMat)
                 memberGO.GetComponent<Renderer>().sharedMaterial = selectedMemberMat;
@@ -1260,7 +1260,7 @@ namespace Mayuns.DSB.Editor
 
                 Undo.RecordObject(connGO.transform, "Position Structural Connection");
                 connGO.transform.SetPositionAndRotation(endConnPos, connection.transform.rotation);
-                connGO.transform.localScale = Vector3.one * connectionThickness;
+                connGO.transform.localScale = Vector3.one * thickness * 1.01f; // Same as member thickness, but scaled up by 1% to prevent Z fighting
 
                 if (selectedConnectionMat)
                     connGO.GetComponent<Renderer>().sharedMaterial = selectedConnectionMat;

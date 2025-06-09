@@ -2,33 +2,31 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using System.Collections;
-using System.Threading;
-using System.Collections.Concurrent;
 
 namespace Mayuns.DSB
 {
     public class StructuralGroupManager : MonoBehaviour
     {
-        [field: SerializeField] public int strengthModifier;
-        [field: SerializeField, HideInInspector] public StructureBuildSettings buildSettings;
-        [field: SerializeField, HideInInspector] public bool isDetached = false;
-        [field: SerializeField, HideInInspector] public List<StructuralMember> structuralMembers = new List<StructuralMember>();
-        [field: SerializeField, HideInInspector] public List<StructuralConnection> memberConnections = new List<StructuralConnection>();
-        [field: SerializeField, HideInInspector] public List<WallManager> walls = new List<WallManager>();
-        [field: SerializeField, HideInInspector] public HashSet<StructuralMember> structuralMembersHash;
-        [field: SerializeField, HideInInspector] public HashSet<StructuralConnection> memberConnectionsHash;
-        [field: SerializeField, HideInInspector] public HashSet<WallManager> wallsHash;
-        [field: SerializeField, HideInInspector] public float minPropagationTime = 0f;
-        [field: SerializeField, HideInInspector] public float maxPropagationTime = 3f;
-        [field: SerializeField, HideInInspector] public float collisionCooldown = 0.2f; // seconds; adjust as needed
-        [field: SerializeField, HideInInspector] public GibManager gibManager;
-        [field: SerializeField, HideInInspector] public bool hasGibManager = false;
-        [field: SerializeField, HideInInspector] public float validationDuration = 0f;
-        [field: SerializeField, HideInInspector] public float validationInterval = .1f;
-        [field: SerializeField, HideInInspector] private float validationCooldown = 0f;
-        [field: SerializeField, HideInInspector] private float lastCollisionTime = -10f;
-        [field: SerializeField, HideInInspector] private float cleanupTimer = 0f;
-        [field: SerializeField, HideInInspector] private const float cleanupInterval = 5f;
+        public int strengthModifier;
+        [HideInInspector] public StructureBuildSettings buildSettings;
+        [HideInInspector] public bool isDetached = false;
+        [HideInInspector] public List<StructuralMember> structuralMembers = new List<StructuralMember>();
+        [HideInInspector] public List<StructuralConnection> memberConnections = new List<StructuralConnection>();
+        [HideInInspector] public List<WallManager> walls = new List<WallManager>();
+        [HideInInspector] public HashSet<StructuralMember> structuralMembersHash;
+        [HideInInspector] public HashSet<StructuralConnection> memberConnectionsHash;
+        [HideInInspector] public HashSet<WallManager> wallsHash;
+        [HideInInspector] public float minPropagationTime = 0f;
+        [HideInInspector] public float maxPropagationTime = 3f;
+        [HideInInspector] public float collisionCooldown = 0.2f; // seconds; adjust as needed
+        [HideInInspector] public GibManager gibManager;
+        [HideInInspector] public bool hasGibManager = false;
+        [HideInInspector] public float validationDuration = 0f;
+        [HideInInspector] public float validationInterval = .1f;
+         private float validationCooldown = 0f;
+        private float lastCollisionTime = -10f;
+        private float cleanupTimer = 0f;
+        private const float cleanupInterval = 5f;
 
         void Update()
         {

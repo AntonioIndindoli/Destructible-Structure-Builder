@@ -1,6 +1,4 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using static Mayuns.DSB.GibBuildingUtility;
 
@@ -8,7 +6,7 @@ namespace Mayuns.DSB
 {
     public abstract class Destructible : MonoBehaviour
     {
-        [field: SerializeField, HideInInspector] public DebrisData[] gibs;
+        [HideInInspector] public DebrisData[] gibs;
         private GibManager gibManager;
 
         void Awake()
