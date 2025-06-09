@@ -801,6 +801,8 @@ namespace Mayuns.DSB.Editor
             wall.WallPieceMass = buildSettings.wallPieceMass;
             wall.wallPieceHealth = buildSettings.wallPieceHealth;
             wall.wallPieceWindowHealth = buildSettings.wallPieceWindowHealth;
+            wall.textureScaleX = buildSettings.wallTextureScaleX;
+            wall.textureScaleY = buildSettings.wallTextureScaleY;
 
             for (int row = 0; row < wall.numRows; row++)
             {
@@ -1235,6 +1237,8 @@ namespace Mayuns.DSB.Editor
             newMem.length = baseLength;
             newMem.mass = memberMass;
             newMem.memberPieceHealth = memberPieceHealth;
+            newMem.textureScaleX = buildSettings.memberTextureScaleX;
+            newMem.textureScaleY = buildSettings.memberTextureScaleY;
             newMem.supportCapacity = memberSupportCapacity;
             newMem.BuildMember();
 
@@ -1460,6 +1464,8 @@ namespace Mayuns.DSB.Editor
             spawnedWall.WallPieceMass = buildSettings.wallPieceMass;
             spawnedWall.wallPieceHealth = buildSettings.wallPieceHealth;
             spawnedWall.wallPieceWindowHealth = buildSettings.wallPieceWindowHealth;
+            spawnedWall.textureScaleX = buildSettings.wallTextureScaleX;
+            spawnedWall.textureScaleY = buildSettings.wallTextureScaleY;
 
             StructuralGroupManager structuralGroup = parent.GetComponent<StructuralGroupManager>();
             if (structuralGroup)

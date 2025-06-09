@@ -27,8 +27,10 @@ namespace Mayuns.DSB
 		[field: SerializeField, HideInInspector] public bool validateAgain = false;
 		[field: SerializeField, HideInInspector] public bool isValidating = false;
 		[field: SerializeField, HideInInspector] public bool isRebuildingGrid = false;
-		[field: SerializeField, HideInInspector] public Material glassMaterial;
-		[field: SerializeField, HideInInspector] public Material wallMaterial;
+                [field: SerializeField, HideInInspector] public Material glassMaterial;
+                [field: SerializeField, HideInInspector] public Material wallMaterial;
+                [field: SerializeField, HideInInspector] public float textureScaleX = 1f;
+                [field: SerializeField, HideInInspector] public float textureScaleY = 1f;
 		private int _lastWallFingerprint;
 		private float variationAmount = .25f;
 		private Vector3[,,] vertexOffsets;
@@ -721,9 +723,9 @@ namespace Mayuns.DSB
 				hash = hash * 31 + numRows;
 				hash = hash * 31 + numColumns;
 
-				for (int i = 0; i < wallGrid.Count; ++i)
-				{
-					WallPiece p = wallGrid[i];
+                                for (int i = 0; i < wallGrid.Count; ++i)
+                                {
+                                        WallPiece p = wallGrid[i];
 
 					// treat “hole” and “proxy” the same
 					if (p == null || p.isProxy) { hash = hash * 31; continue; }
@@ -731,9 +733,11 @@ namespace Mayuns.DSB
 					int code = p.isWindow ? 2 :
 							   (p.cornerDesignation != WallPiece.TriangularCornerDesignation.None ? 3 : 1);
 
-					hash = hash * 31 + code;
-				}
-				return hash;
+                                        hash = hash * 31 + code;
+                                }
+                                hash = hash * 31 + textureScaleX.GetHashCode();
+                                hash = hash * 31 + textureScaleY.GetHashCode();
+                                return hash;
 			}
 		}
 
@@ -763,10 +767,16 @@ namespace Mayuns.DSB
 		/*───────────────────────────────────────────────────────────────────*\
          *  BUILD‑WALL  (editor‑only version)                                *
         \*───────────────────────────────────────────────────────────────────*/
-		public void BuildWall(List<WallPiece> wallGrid, bool rebuilding, StructureBuildSettings _)
-		{
-			int fp = ComputeFingerprint();   // walls that “look” the same share fp
-			_lastWallFingerprint = fp;
+                public void BuildWall(List<WallPiece> wallGrid, bool rebuilding, StructureBuildSettings settings)
+                {
+                        int fp = ComputeFingerprint();   // walls that “look” the same share fp
+                        _lastWallFingerprint = fp;
+
+                        if (settings != null)
+                        {
+                                textureScaleX = settings.wallTextureScaleX;
+                                textureScaleY = settings.wallTextureScaleY;
+                        }
 
 			/*–––– basic data from the source mesh –––––*/
 			MeshFilter mfRoot = GetComponent<MeshFilter>();
@@ -861,23 +871,25 @@ namespace Mayuns.DSB
 					}
 					else              /*───────── SLOW / PROC PATH ──*/
 					{
-						if (isTri)
-							voxelGO = VoxelBuildingUtility.CreateTriangle(
-										 cubeSize, worldPos, gx, gy, 0,
-										 defaultMat, cubeSize, old?.cornerDesignation ?? 0,
-										 worldWallSize, numRows, numColumns,
-										 "WallTriangleVoxel");
-						else if (isWindow)
-							voxelGO = VoxelBuildingUtility.CreateWindow(
-										 cubeSize, worldPos, gx, gy, glassMaterial,
-										 cubeSize, vertexOffsets, worldWallSize,
-										 numRows, numColumns, "WallWindowVoxel");
-						else
-							voxelGO = VoxelBuildingUtility.CreateIrregularCube(
-										 cubeSize, worldPos, gx, gy, 0,
-										 defaultMat, cubeSize, vertexOffsets,
-										 worldWallSize, numRows, numColumns,
-										 1, "WallVoxel");
+                                                if (isTri)
+                                                        voxelGO = VoxelBuildingUtility.CreateTriangle(
+cubeSize, worldPos, gx, gy, 0,
+defaultMat, cubeSize, old?.cornerDesignation ?? 0,
+worldWallSize, numRows, numColumns,
+new Vector2(textureScaleX, textureScaleY),
+"WallTriangleVoxel");
+                                                else if (isWindow)
+                                                        voxelGO = VoxelBuildingUtility.CreateWindow(
+cubeSize, worldPos, gx, gy, glassMaterial,
+cubeSize, vertexOffsets, worldWallSize,
+numRows, numColumns, new Vector2(textureScaleX, textureScaleY), "WallWindowVoxel");
+                                                else
+                                                        voxelGO = VoxelBuildingUtility.CreateIrregularCube(
+cubeSize, worldPos, gx, gy, 0,
+defaultMat, cubeSize, vertexOffsets,
+worldWallSize, numRows, numColumns,
+new Vector2(textureScaleX, textureScaleY),
+1, "WallVoxel");
 
 						Undo.RegisterCreatedObjectUndo(voxelGO, "Create Wall Voxel");
 						voxelComp = Undo.AddComponent<WallPiece>(voxelGO);
