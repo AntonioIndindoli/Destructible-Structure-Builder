@@ -683,7 +683,7 @@ namespace Mayuns.DSB.Editor
 
             // Enable / disable caching
             bool enabled = MeshCacheUtility.Enabled;
-            bool newEnabled = EditorGUILayout.Toggle("Enable Mesh Cache", enabled);
+            bool newEnabled = EditorGUILayout.Toggle("Enable Mesh Persistence", enabled);
             if (newEnabled != enabled)
                 MeshCacheUtility.SetEnabled(newEnabled);
 
@@ -700,10 +700,11 @@ namespace Mayuns.DSB.Editor
                 if (GUILayout.Button("Change...", GUILayout.Width(80)))
                     MeshCacheUtility.PickFolder();
 
-                EditorGUILayout.EndHorizontal();
-
-                if (GUILayout.Button("Clean Cache"))
+            
+                if (GUILayout.Button("Clean Unused Cached Meshes"))
                     MeshCacheUtility.CleanUnusedCache();
+
+                   EditorGUILayout.EndHorizontal(); 
             }
 
             EditorGUILayout.Space(4);
