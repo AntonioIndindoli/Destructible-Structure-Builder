@@ -10,33 +10,33 @@ namespace Mayuns.DSB
 {
 	public class StructuralMember : MonoBehaviour
 	{
-		[field: SerializeField, HideInInspector] public GameObject[] memberPieces;
-		[field: SerializeField, HideInInspector] public bool isDestroyed = false;
-		[field: SerializeField, HideInInspector] public bool isGrouped = false;
-		[field: SerializeField, HideInInspector] public bool isGrounded = false;
-		[field: SerializeField, HideInInspector] public int initialDistanceToGround = int.MaxValue;
-		[field: SerializeField, HideInInspector] public int currentMinDistanceToGround = int.MaxValue;
-		[field: SerializeField, HideInInspector] public List<StructuralMember> cachedAdjacentMembers = new List<StructuralMember>();
-		[field: SerializeField, HideInInspector] public List<WallManager> managerList = new List<WallManager>();
-		[field: SerializeField, HideInInspector] public bool isNewSplitMember = false;
-		[field: SerializeField, HideInInspector] public StructuralGroupManager structuralGroup;
-		[field: SerializeField, HideInInspector] public StructuralConnection startConnection;
-		[field: SerializeField, HideInInspector] public StructuralConnection endConnection;
-		[field: SerializeField, HideInInspector] public bool isSplit = false;
-		[field: SerializeField, HideInInspector] public float thickness;
-		[field: SerializeField, HideInInspector] public float length;
-		[field: SerializeField, HideInInspector] public GameObject combinedObject;
-		[field: SerializeField, HideInInspector] public bool wasDamaged = false;
-		[field: SerializeField, HideInInspector] private int memberDivisionsCount = 5;
-		[field: SerializeField, HideInInspector] private float variationAmount = 0.25f;
-		[field: SerializeField, HideInInspector] private Vector3[,,] vertexOffsets;
-		[field: SerializeField, HideInInspector] private Vector3 worldMemberSize;
-		[field: SerializeField] public float mass = 10f;
-		[field: SerializeField] public float supportCapacity = 100f;
-                [field: SerializeField] public float accumulatedLoad = 0f;
-                [field: SerializeField] public float memberPieceHealth = 100f;
-                [field: SerializeField, HideInInspector] public float textureScaleX = 1f;
-                [field: SerializeField, HideInInspector] public float textureScaleY = 1f;
+		[HideInInspector] public GameObject[] memberPieces;
+		[HideInInspector] public bool isDestroyed = false;
+		[HideInInspector] public bool isGrouped = false;
+		[HideInInspector] public bool isGrounded = false;
+		[HideInInspector] public int initialDistanceToGround = int.MaxValue;
+		[HideInInspector] public int currentMinDistanceToGround = int.MaxValue;
+		[HideInInspector] public List<StructuralMember> cachedAdjacentMembers = new List<StructuralMember>();
+		[HideInInspector] public List<WallManager> managerList = new List<WallManager>();
+		[HideInInspector] public bool isNewSplitMember = false;
+		[HideInInspector] public StructuralGroupManager structuralGroup;
+		[HideInInspector] public StructuralConnection startConnection;
+		[HideInInspector] public StructuralConnection endConnection;
+		[HideInInspector] public bool isSplit = false;
+		[ReadOnly] public float thickness;
+		[ReadOnly] public float length;
+		[HideInInspector] public GameObject combinedObject;
+		[HideInInspector] public bool wasDamaged = false;
+		private int memberDivisionsCount = 5;
+		private float variationAmount = 0.25f;
+		private Vector3[,,] vertexOffsets;
+		private Vector3 worldMemberSize;
+		 public float mass = 10f;
+		 public float supportCapacity = 100f;
+                 public float accumulatedLoad = 0f;
+                 public float memberPieceHealth = 100f;
+                [HideInInspector] public float textureScaleX = 1f;
+                [HideInInspector] public float textureScaleY = 1f;
 
 #if UNITY_EDITOR
 		private void OnDrawGizmosSelected()
@@ -480,7 +480,7 @@ namespace Mayuns.DSB
 				int idx = z;   // 1‑D index for member cells
 
 				/*──── FAST PATH : load cached mesh ────*/
-				Mesh cached = MeshCacheUtility.TryLoad(fp, idx);
+				Mesh cached = MeshCacheUtility.TryLoadPiece(fp, idx);
 				GameObject cube;
 
 				if (cached)
@@ -508,7 +508,7 @@ namespace Mayuns.DSB
 
 					MeshFilter mf = cube.GetComponent<MeshFilter>();
 					if (mf && mf.sharedMesh)
-						mf.sharedMesh = MeshCacheUtility.Persist(mf.sharedMesh, fp, idx);
+						mf.sharedMesh = MeshCacheUtility.PersistPiece(mf.sharedMesh, fp, idx);
 				}
 
 				if (!Application.isPlaying)
@@ -556,6 +556,8 @@ namespace Mayuns.DSB
 
 				mr.enabled = false;
 			}
+
+			MeshCacheUtility.CleanUnusedCache(); // Auto clean cache to prevent leaks
 
 			//──────────────────────────────────────────────────────────────────────────────
 			// 6) Dirty the object & scene, then collapse/group the whole operation

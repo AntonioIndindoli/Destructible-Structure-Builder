@@ -5,32 +5,31 @@ using System.Linq;
 
 #if UNITY_EDITOR
 using UnityEditor;
-using System.IO;
 #endif
 
 namespace Mayuns.DSB
 {
 	public class WallManager : MonoBehaviour
 	{
-		[field: SerializeField, HideInInspector] public float wallPieceHealth = 100f;
-		[field: SerializeField, HideInInspector] public float wallPieceWindowHealth = 1f;
-		[field: SerializeField, HideInInspector] public HashSet<StructuralMember> edgeMembers = new HashSet<StructuralMember>();
-		[field: SerializeField, HideInInspector] public int numRows = 8;
-		[field: SerializeField, HideInInspector] public int numColumns = 8;
-		[field: SerializeField, HideInInspector] public List<Chunk> _chunks = new List<Chunk>();         // all created chunks
-		[field: SerializeField, HideInInspector] public float WallPieceMass = 50.0f;
-		[field: SerializeField, HideInInspector] public bool isGrouped = false;
-		[field: SerializeField, HideInInspector] public List<WallPiece> wallGrid;
-		[field: SerializeField, HideInInspector] public StructuralGroupManager structuralGroup;
-		[field: SerializeField, HideInInspector] public bool isDamaged = false;
-		[field: SerializeField, HideInInspector] public float validationInterval = .1f;
-		[field: SerializeField, HideInInspector] public bool validateAgain = false;
-		[field: SerializeField, HideInInspector] public bool isValidating = false;
-		[field: SerializeField, HideInInspector] public bool isRebuildingGrid = false;
-                [field: SerializeField, HideInInspector] public Material glassMaterial;
-                [field: SerializeField, HideInInspector] public Material wallMaterial;
-                [field: SerializeField, HideInInspector] public float textureScaleX = 1f;
-                [field: SerializeField, HideInInspector] public float textureScaleY = 1f;
+		[HideInInspector] public float wallPieceHealth = 100f;
+		[HideInInspector] public float wallPieceWindowHealth = 1f;
+		[HideInInspector] public HashSet<StructuralMember> edgeMembers = new HashSet<StructuralMember>();
+		[HideInInspector] public int numRows = 8;
+		[HideInInspector] public int numColumns = 8;
+		[HideInInspector] public List<Chunk> _chunks = new List<Chunk>();         // all created chunks
+		[HideInInspector] public float WallPieceMass = 50.0f;
+		[HideInInspector] public bool isGrouped = false;
+		[HideInInspector] public List<WallPiece> wallGrid;
+		[HideInInspector] public StructuralGroupManager structuralGroup;
+		[HideInInspector] public bool isDamaged = false;
+		[HideInInspector] public float validationInterval = .1f;
+		[HideInInspector] public bool validateAgain = false;
+		[HideInInspector] public bool isValidating = false;
+		[HideInInspector] public bool isRebuildingGrid = false;
+		[HideInInspector] public Material glassMaterial;
+		[HideInInspector] public Material wallMaterial;
+		[HideInInspector] public float textureScaleX = 1f;
+		[HideInInspector] public float textureScaleY = 1f;
 		private int _lastWallFingerprint;
 		private float variationAmount = .25f;
 		private Vector3[,,] vertexOffsets;
@@ -115,7 +114,7 @@ namespace Mayuns.DSB
 
 			var piece = combinedGO.GetComponent<WallPiece>();
 
-			// If its a window chunk, shatter into pieces instead of detaching
+			// If it is a window chunk, shatter into pieces instead of detaching
 			if (piece != null && piece.isWindow)
 			{
 				StartCoroutine(ApplyUncombinedDamageOverTime(chunk, int.MaxValue));
@@ -449,10 +448,10 @@ namespace Mayuns.DSB
 
 			Vector2Int[] directions = new Vector2Int[]
 			{
-		new Vector2Int(0, 1),
-		new Vector2Int(0, -1),
-		new Vector2Int(1, 0),
-		new Vector2Int(-1, 0)
+				new Vector2Int(0, 1),
+				new Vector2Int(0, -1),
+				new Vector2Int(1, 0),
+				new Vector2Int(-1, 0)
 			};
 
 			foreach (var piece in allPieces)
@@ -539,7 +538,6 @@ namespace Mayuns.DSB
 		{
 			foreach (StructuralMember member in edgeMembers)
 			{
-				// HashSet guarantees uniqueness, null-check is just defensive
 				if (member != null)
 					member.AddWallManager(this);
 			}
@@ -733,11 +731,13 @@ namespace Mayuns.DSB
 					int code = p.isWindow ? 2 :
 							   (p.cornerDesignation != WallPiece.TriangularCornerDesignation.None ? 3 : 1);
 
-                                        hash = hash * 31 + code;
-                                }
-                                hash = hash * 31 + textureScaleX.GetHashCode();
-                                hash = hash * 31 + textureScaleY.GetHashCode();
-                                return hash;
+
+					hash = hash * 31 + code;
+				}
+				hash = hash * 31 + textureScaleX.GetHashCode();
+				hash = hash * 31 + textureScaleY.GetHashCode();
+				return hash;
+
 			}
 		}
 
@@ -767,6 +767,7 @@ namespace Mayuns.DSB
 		/*───────────────────────────────────────────────────────────────────*\
          *  BUILD‑WALL  (editor‑only version)                                *
         \*───────────────────────────────────────────────────────────────────*/
+
                 public void BuildWall(List<WallPiece> wallGrid, bool rebuilding, StructureBuildSettings settings)
                 {
                         int fp = ComputeFingerprint();   // walls that “look” the same share fp
@@ -777,6 +778,13 @@ namespace Mayuns.DSB
                                 textureScaleX = settings.wallTextureScaleX;
                                 textureScaleY = settings.wallTextureScaleY;
                         }
+
+
+			if (settings != null)
+			{
+				textureScaleX = settings.wallTextureScaleX;
+				textureScaleY = settings.wallTextureScaleY;
+			}
 
 			/*–––– basic data from the source mesh –––––*/
 			MeshFilter mfRoot = GetComponent<MeshFilter>();
@@ -853,7 +861,7 @@ namespace Mayuns.DSB
 					Mesh cachedMesh = null;
 					if (MeshCacheUtility.Enabled)
 					{
-						cachedMesh = MeshCacheUtility.TryLoad(fp, idx);
+						cachedMesh = MeshCacheUtility.TryLoadPiece(fp, idx);
 					}
 
 					GameObject voxelGO;
@@ -871,6 +879,7 @@ namespace Mayuns.DSB
 					}
 					else              /*───────── SLOW / PROC PATH ──*/
 					{
+
                                                 if (isTri)
                                                         voxelGO = VoxelBuildingUtility.CreateTriangle(
 cubeSize, worldPos, gx, gy, 0,
@@ -891,6 +900,7 @@ worldWallSize, numRows, numColumns,
 new Vector2(textureScaleX, textureScaleY),
 1, "WallVoxel");
 
+
 						Undo.RegisterCreatedObjectUndo(voxelGO, "Create Wall Voxel");
 						voxelComp = Undo.AddComponent<WallPiece>(voxelGO);
 						voxelComp.isWindow = isWindow;
@@ -898,7 +908,7 @@ new Vector2(textureScaleX, textureScaleY),
 
 						MeshFilter mf = voxelGO.GetComponent<MeshFilter>();
 						if (mf && mf.sharedMesh)
-							mf.sharedMesh = MeshCacheUtility.Persist(mf.sharedMesh, fp, idx);
+							mf.sharedMesh = MeshCacheUtility.PersistPiece(mf.sharedMesh, fp, idx);
 					}
 
 					/*‑‑ common finalisation –‑*/
@@ -907,6 +917,8 @@ new Vector2(textureScaleX, textureScaleY),
 
 			if (numColumns > 2 && numRows > 2)
 				CombineWall();
+
+			MeshCacheUtility.CleanUnusedCache(); // Auto clean cache to prevent leaks
 		}
 
 		void OnEnable()
