@@ -208,6 +208,19 @@ namespace Mayuns.DSB.Editor
                     EditorGUILayout.HelpBox("Please select a WallDesign asset to apply.", MessageType.Info);
                 }
             }
+            else if (StructureBuildTool.currentMode == StructureBuildTool.BuildMode.ApplyMaterial)
+            {
+                EditorGUILayout.Space(10);
+                GUILayout.Label("Apply Material Mode", EditorStyles.boldLabel);
+
+                StructureBuildTool.selectedMaterialToApply = (Material)EditorGUILayout.ObjectField(
+                    "Material to Apply", StructureBuildTool.selectedMaterialToApply, typeof(Material), false);
+
+                if (StructureBuildTool.selectedMaterialToApply == null)
+                {
+                    EditorGUILayout.HelpBox("Please select a Material to apply.", MessageType.Info);
+                }
+            }
             else if (StructureBuildTool.currentMode == StructureBuildTool.BuildMode.Delete)
             {
                 EditorGUILayout.HelpBox("Click on a wall or structural member in the scene to delete it.", MessageType.Warning);

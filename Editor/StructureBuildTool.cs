@@ -21,6 +21,7 @@ namespace Mayuns.DSB.Editor
             WallBuild,
             WallEdit,
             ApplyDesign,
+            ApplyMaterial,
             Delete
         }
         public enum WallEditSubMode
@@ -42,6 +43,7 @@ namespace Mayuns.DSB.Editor
         public static WallEditSubMode currentWallEditSubMode = WallEditSubMode.None;
         public static WallManager SelectedWall => selectedWall;
         public static WallDesign selectedDesignToApply;
+        public static Material selectedMaterialToApply;
         static WallManager _pendingWall;
         static int _pendingCols;
         static int _pendingRows;
@@ -53,6 +55,7 @@ namespace Mayuns.DSB.Editor
         { BuildMode.WallBuild, "Click a member to attach a wall to it." },
         { BuildMode.WallEdit, "Click wall cells to add/remove elements." },
         { BuildMode.ApplyDesign, "Click a wall to apply the selected design." },
+        { BuildMode.ApplyMaterial, "Click a member or wall to apply the selected material." },
         { BuildMode.Delete, "Click elements to delete them from the scene." },
         { BuildMode.GroundedMode, "Click members to toggle their grounded state." },
     };
@@ -195,6 +198,10 @@ namespace Mayuns.DSB.Editor
 
                 case BuildMode.ApplyDesign:
                     DrawWallGizmos(false);
+                    break;
+
+                case BuildMode.ApplyMaterial:
+                    HandleApplyMaterialMode(e);
                     break;
 
                 case BuildMode.Delete:
@@ -437,6 +444,137 @@ namespace Mayuns.DSB.Editor
             }
 
             Handles.matrix = oldMatrix;
+        }
+
+        static void DrawApplyMaterialHandle(Vector3 position, Quaternion rotation, Vector3 scale, System.Action onClick, string label = null)
+        {
+            Matrix4x4 oldMatrix = Handles.matrix;
+            Handles.matrix = Matrix4x4.TRS(position, rotation, scale);
+
+            Handles.color = new Color(0f, 1f, 1f, 0.6f); // cyan
+            if (Handles.Button(Vector3.zero, Quaternion.identity, 1f, 1f, Handles.CubeHandleCap))
+            {
+                onClick?.Invoke();
+            }
+
+            if (!string.IsNullOrEmpty(label))
+            {
+                Handles.Label(Vector3.up * 1.1f, label, EditorStyles.boldLabel);
+            }
+
+            Handles.matrix = oldMatrix;
+        }
+
+        static void HandleApplyMaterialMode(Event e)
+        {
+            if (selectedMaterialToApply == null)
+                return;
+
+            Ray ray = HandleUtility.GUIPointToWorldRay(e.mousePosition);
+            if (!Physics.Raycast(ray, out RaycastHit hit, raycastDistance)) return;
+
+            WallManager wall = hit.collider.GetComponentInParent<WallManager>();
+            if (wall != null)
+            {
+                DrawApplyMaterialHandle(
+                    wall.transform.position,
+                    wall.transform.rotation,
+                    wall.transform.lossyScale,
+                    () => ApplyMaterialToWall(wall, selectedMaterialToApply),
+                    "Apply Material"
+                );
+                return;
+            }
+
+            StructuralMember member = hit.collider.GetComponentInParent<StructuralMember>();
+            if (member != null)
+            {
+                Vector3 pos = member.transform.position;
+                Quaternion rot = member.transform.rotation;
+                Vector3 scale = Vector3.one;
+
+                MeshFilter mesh = member.GetComponent<MeshFilter>();
+                if (mesh != null && mesh.sharedMesh != null)
+                {
+                    Bounds bounds = mesh.sharedMesh.bounds;
+                    pos = member.transform.TransformPoint(bounds.center);
+                    scale = Vector3.Scale(member.transform.lossyScale, bounds.size);
+                }
+
+                DrawApplyMaterialHandle(
+                    pos,
+                    rot,
+                    scale,
+                    () => ApplyMaterialToMember(member, selectedMaterialToApply),
+                    "Apply Material"
+                );
+                return;
+            }
+
+            StructuralConnection connection = hit.collider.GetComponentInParent<StructuralConnection>();
+            if (connection != null)
+            {
+                Vector3 pos = connection.transform.position;
+                Quaternion rot = connection.transform.rotation;
+                Vector3 scale = connection.transform.lossyScale;
+
+                MeshFilter mesh = connection.GetComponent<MeshFilter>();
+                if (mesh != null && mesh.sharedMesh != null)
+                {
+                    Bounds bounds = mesh.sharedMesh.bounds;
+                    pos = connection.transform.TransformPoint(bounds.center);
+                    scale = Vector3.Scale(connection.transform.lossyScale, bounds.size);
+                }
+
+                DrawApplyMaterialHandle(
+                    pos,
+                    rot,
+                    scale,
+                    () => ApplyMaterialToConnection(connection, selectedMaterialToApply),
+                    "Apply Material"
+                );
+            }
+        }
+
+        static void ApplyMaterialToConnection(StructuralConnection conn, Material mat)
+        {
+            if (conn == null) return;
+            var rend = conn.GetComponent<Renderer>();
+            if (rend != null)
+            {
+                Undo.RecordObject(rend, "Apply Material");
+                rend.sharedMaterial = mat;
+            }
+        }
+
+        static void ApplyMaterialToMember(StructuralMember member, Material mat)
+        {
+            if (member == null) return;
+
+            var rend = member.GetComponent<Renderer>();
+            if (rend != null)
+            {
+                Undo.RecordObject(rend, "Apply Material");
+                rend.sharedMaterial = mat;
+            }
+
+            member.UncombineMember();
+            member.BuildMember();
+
+            ApplyMaterialToConnection(member.startConnection, mat);
+            ApplyMaterialToConnection(member.endConnection, mat);
+        }
+
+        static void ApplyMaterialToWall(WallManager wall, Material mat)
+        {
+            if (wall == null || buildSettings == null) return;
+
+            Undo.RecordObject(wall, "Apply Wall Material");
+            wall.wallMaterial = mat;
+            wall.InstantUncombine();
+            wall.RelinkWallGridReferences();
+            wall.BuildWall(wall.wallGrid, true, buildSettings);
+            EditorUtility.SetDirty(wall);
         }
 
         static void DrawWallCells(WallManager wall)
