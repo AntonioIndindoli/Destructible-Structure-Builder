@@ -584,6 +584,8 @@ namespace Mayuns.DSB.Editor
             buildSettings.memberThickness = EditorGUILayout.FloatField("Member Thickness", buildSettings.memberThickness);
             buildSettings.memberMass = EditorGUILayout.FloatField("Member Mass", buildSettings.memberMass);
             buildSettings.memberPieceHealth = EditorGUILayout.FloatField("Member Piece Health", buildSettings.memberPieceHealth);
+            buildSettings.memberTextureScaleX = EditorGUILayout.FloatField("Member Texture Scale X", buildSettings.memberTextureScaleX);
+            buildSettings.memberTextureScaleY = EditorGUILayout.FloatField("Member Texture Scale Y", buildSettings.memberTextureScaleY);
             buildSettings.memberSupportCapacity = EditorGUILayout.FloatField("Member Support Capacity", buildSettings.memberSupportCapacity);
             buildSettings.memberMaterial = (Material)EditorGUILayout.ObjectField("Member Material", buildSettings.memberMaterial, typeof(Material), false);
             buildSettings.disableDirection = (DisableDirection)EditorGUILayout.EnumPopup("Disable Direction", buildSettings.disableDirection);
@@ -613,6 +615,8 @@ namespace Mayuns.DSB.Editor
             buildSettings.wallPieceMass = EditorGUILayout.FloatField("Wall Piece Mass", buildSettings.wallPieceMass);
             buildSettings.wallPieceHealth = EditorGUILayout.FloatField("Wall Piece Health", buildSettings.wallPieceHealth);
             buildSettings.wallPieceWindowHealth = EditorGUILayout.FloatField("Window Piece Health", buildSettings.wallPieceWindowHealth);
+            buildSettings.wallTextureScaleX = EditorGUILayout.FloatField("Wall Texture Scale X", buildSettings.wallTextureScaleX);
+            buildSettings.wallTextureScaleY = EditorGUILayout.FloatField("Wall Texture Scale Y", buildSettings.wallTextureScaleY);
 
             EditorGUIUtility.labelWidth = originalLabelWidth;
         }

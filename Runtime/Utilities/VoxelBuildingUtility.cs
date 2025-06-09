@@ -16,6 +16,7 @@ namespace Mayuns.DSB
                 Vector3 worldWallSize,
                 int numRows,
                 int numColumns,
+                Vector2 textureScale,
                 string objectName)
         {
             GameObject quad = new GameObject(objectName);
@@ -102,6 +103,7 @@ namespace Mayuns.DSB
                 WallPiece.TriangularCornerDesignation corner,
                 Vector3 worldWallSize,
                 int numRows, int numColumns,
+                Vector2 textureScale,
                 string objectName)
         {
             GameObject triangle = new GameObject(objectName);
@@ -335,6 +337,9 @@ namespace Mayuns.DSB
                 trianglesList.Add(sideStart + 2);
             }
 
+            for (int i = 0; i < uvsList.Count; i++)
+                uvsList[i] = Vector2.Scale(uvsList[i], textureScale);
+
             mesh.SetVertices(verticesList);
             mesh.SetTriangles(trianglesList, 0);
             mesh.SetNormals(normalsList);
@@ -353,7 +358,9 @@ namespace Mayuns.DSB
                 Vector3 cubeSize,
                 Vector3[,,] vertexOffsets,
                 Vector3 worldWallSize,
-                int numRows, int numColumns, int numZDepth,
+                int numRows, int numColumns,
+                Vector2 textureScale,
+                int numZDepth,
                 string objectName)
         {
             GameObject cube = new GameObject(objectName);
@@ -473,6 +480,9 @@ namespace Mayuns.DSB
             uvs[21] = UvRight(x + 1, y + 1, z);
             uvs[22] = UvRight(x + 1, y + 1, z + 1);
             uvs[23] = UvRight(x + 1, y, z + 1);
+
+            for (int i = 0; i < uvs.Length; i++)
+                uvs[i] = Vector2.Scale(uvs[i], textureScale);
 
 
             Vector2 UvFront(int vx, int vy, int vz)

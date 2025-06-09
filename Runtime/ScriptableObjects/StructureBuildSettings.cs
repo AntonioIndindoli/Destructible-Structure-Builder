@@ -15,6 +15,8 @@ namespace Mayuns.DSB
         public float memberThickness = 0.25f;
         public float memberMass = 10f;
         public float memberPieceHealth = 100f;
+        public float memberTextureScaleX = 1f;
+        public float memberTextureScaleY = 1f;
         public float memberSupportCapacity = 100f;
         public Material memberMaterial;
         public DisableDirection disableDirection;
@@ -37,5 +39,7 @@ namespace Mayuns.DSB
         public float wallPieceMass = 50f;
         public float wallPieceHealth = 100f;
         public float wallPieceWindowHealth = 1f;
+        public float wallTextureScaleX = 1f;
+        public float wallTextureScaleY = 1f;
     }
 }
