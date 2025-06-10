@@ -23,7 +23,7 @@ namespace Mayuns.DSB
         [HideInInspector] public bool hasGibManager = false;
         [HideInInspector] public float validationDuration = 0f;
         [HideInInspector] public float validationInterval = .1f;
-         private float validationCooldown = 0f;
+        private float validationCooldown = 0f;
         private float lastCollisionTime = -10f;
         private float cleanupTimer = 0f;
         private const float cleanupInterval = 5f;
@@ -96,9 +96,31 @@ namespace Mayuns.DSB
 
                 UpdateCurrentMinDistancesToGround(true);
                 PropagateStructuralLoads(true);
+
+                // After initialization, ensure members and connections do not
+                // generate self-collisions
+                IgnoreInternalCollisions();
             }
         }
+        void IgnoreInternalCollisions()
+        {
+            var colliders = new List<Collider>();
 
+            if (structuralMembersHash != null)
+                foreach (var m in structuralMembersHash)
+                    if (m != null)
+                        colliders.AddRange(m.GetComponentsInChildren<Collider>());
+
+            if (memberConnectionsHash != null)
+                foreach (var c in memberConnectionsHash)
+                    if (c != null)
+                        colliders.AddRange(c.GetComponentsInChildren<Collider>());
+
+            for (int i = 0; i < colliders.Count; ++i)
+                for (int j = i + 1; j < colliders.Count; ++j)
+                    if (colliders[i] != null && colliders[j] != null)
+                        Physics.IgnoreCollision(colliders[i], colliders[j]);
+        }
         public void ValidateGroupIntegrity()
         {
             // Restart validation timer
@@ -492,6 +514,13 @@ namespace Mayuns.DSB
                         wallManager.ValidateWallIntegrity();
                     }
                 }
+                foreach (var wallManager in wallsHash)
+                {
+                    if (wallManager != null)
+                    {
+                        wallManager.ValidateWallIntegrity();
+                    }
+                }
             }
 
             // Cleanup wall references list
@@ -558,7 +587,6 @@ namespace Mayuns.DSB
                 rb.velocity = sourceRb.velocity;
                 rb.angularVelocity = sourceRb.angularVelocity;
             }
-            rb.velocity += Vector3.down * 1f;
 
             if (hasGibManager)
             {

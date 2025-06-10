@@ -28,28 +28,28 @@ namespace Mayuns.DSB
 		[ReadOnly] public float length;
 		[HideInInspector] public GameObject combinedObject;
 		[HideInInspector] public bool wasDamaged = false;
-                private int memberDivisionsCount = 5;
-                private float variationAmount = 0.25f;
-                private Vector3[,,] vertexOffsets;
-                private Vector3 worldMemberSize;
-		 public float mass = 10f;
-		 public float supportCapacity = 100f;
-                public float accumulatedLoad = 0f;
-                 public float memberPieceHealth = 100f;
-                [HideInInspector] public float textureScaleX = 1f;
-                [HideInInspector] public float textureScaleY = 1f;
+		private int memberDivisionsCount = 5;
+		private float variationAmount = 0.25f;
+		private Vector3[,,] vertexOffsets;
+		private Vector3 worldMemberSize;
+		public float mass = 10f;
+		public float supportCapacity = 100f;
+		public float accumulatedLoad = 0f;
+		public float memberPieceHealth = 100f;
+		[HideInInspector] public float textureScaleX = 1f;
+		[HideInInspector] public float textureScaleY = 1f;
 
-                int ComputeFingerprint()
-                {
-                        unchecked
-                        {
-                                int hash = 17;
-                                hash = hash * 31 + memberDivisionsCount;
-                                hash = hash * 31 + textureScaleX.GetHashCode();
-                                hash = hash * 31 + textureScaleY.GetHashCode();
-                                return hash;
-                        }
-                }
+		int ComputeFingerprint()
+		{
+			unchecked
+			{
+				int hash = 17;
+				hash = hash * 31 + memberDivisionsCount;
+				hash = hash * 31 + textureScaleX.GetHashCode();
+				hash = hash * 31 + textureScaleY.GetHashCode();
+				return hash;
+			}
+		}
 
 #if UNITY_EDITOR
 		private void OnDrawGizmosSelected()
@@ -123,6 +123,7 @@ namespace Mayuns.DSB
 				structuralGroup.ValidateGroupIntegrity();
 			SelfDestructCheck();
 		}
+
 		public void SelfDestructCheck()
 		{
 			bool allNull = memberPieces.All(obj => obj == null);
@@ -131,6 +132,42 @@ namespace Mayuns.DSB
 				isDestroyed = true;
 				Destroy(gameObject);
 			}
+		}
+
+		/// <summary>
+		/// Shrinks the Z–size of the collider on the piece to the
+		/// left or right of <paramref name="destroyedIndex"/> if that piece
+		/// is in‑between (not an edge) and still active.
+		/// </summary>
+		public void AdjustNeighboursAfterDestruction(int destroyedIndex)
+		{
+			// Early‑out: works only after we have split at least once.
+			if (!isSplit || memberPieces == null) return;
+
+			int last = memberPieces.Length - 1;
+
+			void ShrinkIfValid(int neighbourIndex)
+			{
+				// skip edges
+				if (neighbourIndex <= 0 || neighbourIndex >= last) return;
+
+				GameObject neighGO = memberPieces[neighbourIndex];
+				if (neighGO == null) return;
+
+				// shrink only once
+				BoxCollider col = neighGO.GetComponent<BoxCollider>();
+				if (!col || col.size.z < 0.75f) return;          // already shrunk? skip
+
+				Vector3 size = col.size; size.z *= .4f;
+				Vector3 centre = col.center; centre.z = 0f;      // recenter (optional)
+
+				col.size = size;
+				col.center = centre;
+			}
+
+			// try both sides
+			ShrinkIfValid(destroyedIndex - 1);
+			ShrinkIfValid(destroyedIndex + 1);
 		}
 
 		public void DestroyRandomMemberPiece()
@@ -480,8 +517,8 @@ namespace Mayuns.DSB
 			//──────────────────────────────────────────────────────────────────────────────
 			// 4) Create voxels – every new object/component registered with Undo
 			//──────────────────────────────────────────────────────────────────────────────
-                        int fp = ComputeFingerprint();
-                        for (int z = 0; z < memberDivisionsCount; z++)
+			int fp = ComputeFingerprint();
+			for (int z = 0; z < memberDivisionsCount; z++)
 			{
 				Vector3 localCubePosition = new(
 					0,
@@ -511,13 +548,13 @@ namespace Mayuns.DSB
 				else
 				{
 					/*──── SLOW PATH : procedural build ────*/
-                                        cube = VoxelBuildingUtility.CreateIrregularCube(
-                                                 cubeSize, worldCubePosition, 0, 0, z,
-                                                 originalMaterial, cubeSize, vertexOffsets,
-                                                 worldMemberSize, 1, 1,
-                                                 new Vector2(textureScaleX, textureScaleY),
-                                                 memberDivisionsCount,
-                                                 "StructuralMemberVoxel");
+					cube = VoxelBuildingUtility.CreateIrregularCube(
+							 cubeSize, worldCubePosition, 0, 0, z,
+							 originalMaterial, cubeSize, vertexOffsets,
+							 worldMemberSize, 1, 1,
+							 new Vector2(textureScaleX, textureScaleY),
+							 memberDivisionsCount,
+							 "StructuralMemberVoxel");
 
 					MeshFilter mf = cube.GetComponent<MeshFilter>();
 					if (mf && mf.sharedMesh)
@@ -533,12 +570,20 @@ namespace Mayuns.DSB
 
 
 				// add collider via Undo
-				BoxCollider meshCol = !Application.isPlaying
+				BoxCollider boxCol = !Application.isPlaying
 					? Undo.AddComponent<BoxCollider>(cube)
 					: cube.AddComponent<BoxCollider>();
 
 
-				//meshCol.convex = true;
+				// Ignore collision with start/end connections if present
+				if (startConnection && startConnection.TryGetComponent<Collider>(out var startCol))
+				{
+					Physics.IgnoreCollision(boxCol, startCol);
+				}
+				if (endConnection && endConnection.TryGetComponent<Collider>(out var endCol))
+				{
+					Physics.IgnoreCollision(boxCol, endCol);
+				}
 
 				Vector3 localScale = cube.transform.localScale;
 				Quaternion localRotation = cube.transform.localRotation;

@@ -187,7 +187,7 @@ namespace Mayuns.DSB
             {
                 activeGibs.Add(gib);
                 currentActiveGibs = activeGibs.Count;
-                ApplyRandomExplosion(gib);
+                //ApplyRandomExplosion(gib);
             }
             else
             {
@@ -221,7 +221,7 @@ namespace Mayuns.DSB
 
             if (gibShellPool.Count < maxPoolSize && !invalid)
             {
-                ApplyRandomExplosion(gib);
+                //ApplyRandomExplosion(gib);
                 gibShellPool.Enqueue(gib);
             }
             else

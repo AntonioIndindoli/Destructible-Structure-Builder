@@ -141,7 +141,7 @@ namespace Mayuns.DSB
         public void SelfDestructCheck()
         {
             if (GetMembers().Count == 0) Destroy(gameObject);
-            else if (GetMembers().Count == 1)
+            else if (GetMembers().Count == 0)
             {
                 DestroyConnection();
             }

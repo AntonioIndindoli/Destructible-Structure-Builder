@@ -40,8 +40,12 @@ public class SimplePlayerController : MonoBehaviour
         if (controller.isGrounded && yVelocity < 0)
             yVelocity = -2f;
 
-        if (Input.GetButtonDown("Jump") && controller.isGrounded)
+        if (Input.GetButtonDown("Jump"))
+        {
+            print("jumped");
             yVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
+        }
+            
 
         yVelocity += gravity * Time.deltaTime;
         controller.Move(Vector3.up * yVelocity * Time.deltaTime);

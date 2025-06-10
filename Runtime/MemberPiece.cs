@@ -7,7 +7,7 @@ namespace Mayuns.DSB
         [HideInInspector] public bool isDestroyed = false;
         [HideInInspector] public StructuralMember member;
         public float accumulatedDamage = 0;
-        // show member.memberPieceHealth in inspector along with accumulated damage somehow
+
         public void DestroyMemberPiece()
         {
             TakeDamage(member.memberPieceHealth);
@@ -26,10 +26,10 @@ namespace Mayuns.DSB
                 if (member != null)
                 {
                     member.PieceDestroyed();
+                    // tell the member a voxel is gone
                     int idx = System.Array.IndexOf(member.memberPieces, gameObject);
-
-                    if (idx >= 0)      // found it
-                        member.memberPieces[idx] = null;
+                    member.memberPieces[idx] = null;
+                    member.AdjustNeighboursAfterDestruction(idx);
                     member.SelfDestructCheck();
                 }
 
