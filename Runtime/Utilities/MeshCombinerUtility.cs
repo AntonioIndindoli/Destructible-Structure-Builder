@@ -65,19 +65,6 @@ namespace Mayuns.DSB
         {
             if (piece == null) return;
 
-            WallPiece wallPiece = piece.GetComponent<WallPiece>();
-            MemberPiece memberPiece = piece.GetComponent<MemberPiece>();
-
-            if (wallPiece != null)
-            {
-                bool isWindow = wallPiece.isWindow;
-                wallPiece.CreateAndStoreDebrisData(1, isWindow);
-            }
-            else if (memberPiece != null)
-            {
-                memberPiece.CreateAndStoreDebrisData(1, false);
-            }
-
             piece.SetActive(false);
         }
 

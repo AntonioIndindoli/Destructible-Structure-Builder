@@ -3,16 +3,14 @@ using UnityEditor;
 namespace Mayuns.DSB.Editor
 {
     [InitializeOnLoad]
-    static class StressVisualizerToolbar
+    internal static class StressVisualizerToolbar
     {
         const string kMenuPath = "Tools/DSB/Visualize Stress Gizmos";
-        const string kSessionKey = "DSB_VISUALIZE_STRESS";
         static bool _enabled;
 
         static StressVisualizerToolbar()
         {
-            _enabled = SessionState.GetBool(kSessionKey, false);
-            StructuralStressVisualizer.SetVisualizeGizmos(_enabled);
+            _enabled = StressVisualizerState.IsEnabled;
             Menu.SetChecked(kMenuPath, _enabled);
         }
 
@@ -20,9 +18,9 @@ namespace Mayuns.DSB.Editor
         static void Toggle()
         {
             _enabled = !_enabled;
-            SessionState.SetBool(kSessionKey, _enabled);
-            StructuralStressVisualizer.SetVisualizeGizmos(_enabled);
+            StressVisualizerState.IsEnabled = _enabled;   // ‹— keep single source of truth
             Menu.SetChecked(kMenuPath, _enabled);
+            SceneView.RepaintAll();                      // ‹— instant feedback
         }
 
         [MenuItem(kMenuPath, true)]

@@ -24,6 +24,11 @@ namespace Mayuns.DSB
         [HideInInspector] public TriangularCornerDesignation cornerDesignation = TriangularCornerDesignation.None;
         [HideInInspector] public bool isWindow;
         [HideInInspector] public bool isEmpty;
+
+        void Start()
+        {
+            CreateAndStoreDebrisData(1, isWindow);
+        }
         
         public void DestroyWallPiece()
         {

@@ -83,11 +83,6 @@ public class PlayerOptions : MonoBehaviour
         isCameraLocked = false;
     }
 
-    private void TogglePhysicsVisualization(bool isEnabled)
-    {
-        StructuralStressVisualizer.SetVisualizeGizmos(isEnabled);
-    }
-
     private void ToggleFPSCounter(bool isEnabled)
     {
         isFPSCounterVisible = isEnabled;

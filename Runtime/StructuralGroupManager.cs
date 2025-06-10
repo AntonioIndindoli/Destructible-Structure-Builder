@@ -8,6 +8,8 @@ namespace Mayuns.DSB
     public class StructuralGroupManager : MonoBehaviour
     {
         public int strengthModifier;
+        public float minPropagationTime = 0f;
+        public float maxPropagationTime = 3f;
         [HideInInspector] public StructureBuildSettings buildSettings;
         [HideInInspector] public bool isDetached = false;
         [HideInInspector] public List<StructuralMember> structuralMembers = new List<StructuralMember>();
@@ -16,8 +18,6 @@ namespace Mayuns.DSB
         [HideInInspector] public HashSet<StructuralMember> structuralMembersHash;
         [HideInInspector] public HashSet<StructuralConnection> memberConnectionsHash;
         [HideInInspector] public HashSet<WallManager> wallsHash;
-        [HideInInspector] public float minPropagationTime = 0f;
-        [HideInInspector] public float maxPropagationTime = 3f;
         [HideInInspector] public float collisionCooldown = 0.2f; // seconds; adjust as needed
         [HideInInspector] public GibManager gibManager;
         [HideInInspector] public bool hasGibManager = false;
@@ -633,6 +633,43 @@ namespace Mayuns.DSB
         }
 
 #if UNITY_EDITOR
+        /// <summary>
+        /// Calculate structural loads without running the full runtime logic.
+        /// Used by the stress visualizer when toggled in the editor.
+        /// </summary>
+        public void CalculateLoadsForEditor()
+        {
+            if (structuralMembersHash == null || structuralMembersHash.Count == 0)
+                return;
+
+            UpdateCurrentMinDistancesToGround(true);
+
+            foreach (var member in structuralMembersHash)
+                member.accumulatedLoad = member.mass;
+
+            var membersSorted = structuralMembersHash
+                .Where(m => !m.isDestroyed &&
+                            !m.isNewSplitMember &&
+                            m.currentMinDistanceToGround < int.MaxValue)
+                .OrderByDescending(m => m.currentMinDistanceToGround)
+                .ToList();
+
+            foreach (var member in membersSorted)
+            {
+                var lowerSupports = member.cachedAdjacentMembers
+                    .Where(n => n != null &&
+                                !n.isDestroyed &&
+                                n.currentMinDistanceToGround < member.currentMinDistanceToGround)
+                    .ToList();
+
+                if (lowerSupports.Count == 0)
+                    continue;
+
+                float sharedLoad = member.accumulatedLoad / lowerSupports.Count;
+                foreach (var lower in lowerSupports)
+                    lower.accumulatedLoad += sharedLoad;
+            }
+        }
         public void RebuildVoxels()
         {
             // Rebuild all walls

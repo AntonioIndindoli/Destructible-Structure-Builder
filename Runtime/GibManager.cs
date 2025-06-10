@@ -138,7 +138,7 @@ namespace Mayuns.DSB
             {
                 Bounds meshBounds = data.sharedMesh.bounds;
                 bc.center = meshBounds.center;
-                bc.size = meshBounds.size*.5f;
+                bc.size = meshBounds.size*.3f;
             }
 
             var rb = gib.GetComponent<Rigidbody>();

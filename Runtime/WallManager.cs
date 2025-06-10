@@ -915,7 +915,7 @@ new Vector2(textureScaleX, textureScaleY),
 					SetupWallComponent(voxelComp, localPos, gx, gy, isWindow);
 				}
 
-			if (numColumns > 2 && numRows > 2)
+			if (numColumns > 1 && numRows > 1)
 				CombineWall();
 
 			MeshCacheUtility.CleanUnusedCache(); // Auto clean cache to prevent leaks

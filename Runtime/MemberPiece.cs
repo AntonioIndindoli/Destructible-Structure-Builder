@@ -13,6 +13,11 @@ namespace Mayuns.DSB
             TakeDamage(member.memberPieceHealth);
         }
 
+        void Start()
+        {
+            CreateAndStoreDebrisData(1, false);
+        }
+
         public void TakeDamage(float damage)
         {
             if (isDestroyed) return;
