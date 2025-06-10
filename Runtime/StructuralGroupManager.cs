@@ -633,6 +633,46 @@ namespace Mayuns.DSB
         }
 
 #if UNITY_EDITOR
+        /// <summary>
+        /// Calculate structural loads without running the full runtime logic.
+        /// Used by the stress visualizer when toggled in the editor.
+        /// </summary>
+        public void CalculateLoadsForEditor()
+        {
+            if (structuralMembersHash == null || structuralMembersHash.Count == 0)
+                return;
+
+            UpdateCurrentMinDistancesToGround(true);
+
+            foreach (var member in structuralMembersHash)
+                member.accumulatedLoad = member.mass;
+
+            var membersSorted = structuralMembersHash
+                .Where(m => !m.isDestroyed &&
+                            !m.isNewSplitMember &&
+                            m.currentMinDistanceToGround < int.MaxValue)
+                .OrderByDescending(m => m.currentMinDistanceToGround)
+                .ToList();
+
+            foreach (var member in membersSorted)
+            {
+                var lowerSupports = member.cachedAdjacentMembers
+                    .Where(n => n != null &&
+                                !n.isDestroyed &&
+                                n.currentMinDistanceToGround < member.currentMinDistanceToGround)
+                    .ToList();
+
+                if (lowerSupports.Count == 0)
+                    continue;
+
+                float sharedLoad = member.accumulatedLoad / lowerSupports.Count;
+                foreach (var lower in lowerSupports)
+                    lower.accumulatedLoad += sharedLoad;
+            }
+        }
+#endif
+
+#if UNITY_EDITOR
         public void RebuildVoxels()
         {
             // Rebuild all walls
