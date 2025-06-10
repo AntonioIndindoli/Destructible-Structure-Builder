@@ -97,11 +97,11 @@ namespace Mayuns.DSB
                 UpdateCurrentMinDistancesToGround(true);
                 PropagateStructuralLoads(true);
 
-                // After initialization, ensure members and connections do not
-                // generate self-collisions
+                // Ensure members and connections do not generate self-collisions
                 IgnoreInternalCollisions();
             }
         }
+
         void IgnoreInternalCollisions()
         {
             var colliders = new List<Collider>();
@@ -109,18 +109,19 @@ namespace Mayuns.DSB
             if (structuralMembersHash != null)
                 foreach (var m in structuralMembersHash)
                     if (m != null)
-                        colliders.AddRange(m.GetComponentsInChildren<Collider>());
+                        colliders.AddRange(m.GetComponentsInChildren<Collider>(true));
 
             if (memberConnectionsHash != null)
                 foreach (var c in memberConnectionsHash)
                     if (c != null)
-                        colliders.AddRange(c.GetComponentsInChildren<Collider>());
+                        colliders.AddRange(c.GetComponentsInChildren<Collider>(true));
 
             for (int i = 0; i < colliders.Count; ++i)
                 for (int j = i + 1; j < colliders.Count; ++j)
                     if (colliders[i] != null && colliders[j] != null)
                         Physics.IgnoreCollision(colliders[i], colliders[j]);
         }
+
         public void ValidateGroupIntegrity()
         {
             // Restart validation timer

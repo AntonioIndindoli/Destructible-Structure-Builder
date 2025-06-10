@@ -5,7 +5,6 @@ using UnityEngine.UI;
 
 public class PlayerOptions : MonoBehaviour
 {
-    public Toggle physicsVisualizationToggle;
     public Toggle FPSToggle;
     public Camera playerCamera;
     public GameObject optionsPanel;
@@ -23,12 +22,8 @@ public class PlayerOptions : MonoBehaviour
         // Lock the cursor at the start
         LockCursor();
 
-        // Set up the toggle buttons' initial state
-        physicsVisualizationToggle.isOn = false;
         FPSToggle.isOn = true;
 
-        // Set listeners for the toggles
-        physicsVisualizationToggle.onValueChanged.AddListener(TogglePhysicsVisualization);
         FPSToggle.onValueChanged.AddListener(ToggleFPSCounter);
 
         info.gameObject.SetActive(true);

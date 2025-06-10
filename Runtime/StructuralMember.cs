@@ -137,29 +137,27 @@ namespace Mayuns.DSB
 		/// <summary>
 		/// Shrinks the Z–size of the collider on the piece to the
 		/// left or right of <paramref name="destroyedIndex"/> if that piece
-		/// is in‑between (not an edge) and still active.
+		/// is still active. 
 		/// </summary>
 		public void AdjustNeighboursAfterDestruction(int destroyedIndex)
 		{
 			// Early‑out: works only after we have split at least once.
 			if (!isSplit || memberPieces == null) return;
 
-			int last = memberPieces.Length - 1;
-
 			void ShrinkIfValid(int neighbourIndex)
 			{
-				// skip edges
-				if (neighbourIndex <= 0 || neighbourIndex >= last) return;
+				// ensure index is in bounds
+				if (neighbourIndex < 0 || neighbourIndex >= memberPieces.Length) return;
 
 				GameObject neighGO = memberPieces[neighbourIndex];
 				if (neighGO == null) return;
 
 				// shrink only once
 				BoxCollider col = neighGO.GetComponent<BoxCollider>();
-				if (!col || col.size.z < 0.75f) return;          // already shrunk? skip
+				if (!col || col.size.z < 0.75f) return;  // already shrunk? skip
 
-				Vector3 size = col.size; size.z *= .4f;
-				Vector3 centre = col.center; centre.z = 0f;      // recenter (optional)
+				Vector3 size = col.size; size.z *= 0.3f;
+				Vector3 centre = col.center; centre.z = 0f;
 
 				col.size = size;
 				col.center = centre;
@@ -169,6 +167,7 @@ namespace Mayuns.DSB
 			ShrinkIfValid(destroyedIndex - 1);
 			ShrinkIfValid(destroyedIndex + 1);
 		}
+
 
 		public void DestroyRandomMemberPiece()
 		{
