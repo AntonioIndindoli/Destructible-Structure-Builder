@@ -34,6 +34,16 @@ namespace Mayuns.DSB
                     else if (vis != null) Destroy(vis);
                 }
             }
+
+#if UNITY_EDITOR
+            if (enable && !Application.isPlaying)
+            {
+                var groups = Object.FindObjectsByType<StructuralGroupManager>(
+                    FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+                foreach (var g in groups)
+                    g.CalculateLoadsForEditor();
+            }
+#endif
         }
 
         /*──────────────────── INSTANCE DATA ────────────────────*/
