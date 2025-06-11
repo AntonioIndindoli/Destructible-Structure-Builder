@@ -12,7 +12,6 @@ namespace Mayuns.DSB
 	public class WallManager : MonoBehaviour
 	{
 		[HideInInspector] public float wallPieceHealth = 100f;
-		[HideInInspector] public float wallPieceWindowHealth = 1f;
 		[HideInInspector] public HashSet<StructuralMember> edgeMembers = new HashSet<StructuralMember>();
 		[HideInInspector] public int numRows = 8;
 		[HideInInspector] public int numColumns = 8;
@@ -188,9 +187,9 @@ namespace Mayuns.DSB
 			}
 		}
 
-                // Destroy the wall object when only a single piece remains
-                public void SelfDestructCheck()
-                {
+		// Destroy the wall object when only a single piece remains
+		public void SelfDestructCheck()
+		{
 			int count = 0;
 			foreach (var p in wallGrid)
 			{
@@ -722,9 +721,9 @@ namespace Mayuns.DSB
 				hash = hash * 31 + numRows;
 				hash = hash * 31 + numColumns;
 
-                                for (int i = 0; i < wallGrid.Count; ++i)
-                                {
-                                        WallPiece p = wallGrid[i];
+				for (int i = 0; i < wallGrid.Count; ++i)
+				{
+					WallPiece p = wallGrid[i];
 
 					// treat “hole” and “proxy” the same
 					if (p == null || p.isProxy) { hash = hash * 31; continue; }
@@ -769,16 +768,16 @@ namespace Mayuns.DSB
          *  BUILD‑WALL  (editor‑only version)                                *
         \*───────────────────────────────────────────────────────────────────*/
 
-                public void BuildWall(List<WallPiece> wallGrid, bool rebuilding, StructureBuildSettings settings)
-                {
-                        int fp = ComputeFingerprint();   // walls that “look” the same share fp
-                        _lastWallFingerprint = fp;
+		public void BuildWall(List<WallPiece> wallGrid, bool rebuilding, StructureBuildSettings settings)
+		{
+			int fp = ComputeFingerprint();   // walls that “look” the same share fp
+			_lastWallFingerprint = fp;
 
-                        if (settings != null)
-                        {
-                                textureScaleX = settings.wallTextureScaleX;
-                                textureScaleY = settings.wallTextureScaleY;
-                        }
+			if (settings != null)
+			{
+				textureScaleX = settings.wallTextureScaleX;
+				textureScaleY = settings.wallTextureScaleY;
+			}
 
 
 			if (settings != null)
@@ -881,20 +880,20 @@ namespace Mayuns.DSB
 					else              /*───────── SLOW / PROC PATH ──*/
 					{
 
-                                                if (isTri)
-                                                        voxelGO = VoxelBuildingUtility.CreateTriangle(
+						if (isTri)
+							voxelGO = VoxelBuildingUtility.CreateTriangle(
 cubeSize, worldPos, gx, gy, 0,
 defaultMat, cubeSize, old?.cornerDesignation ?? 0,
 worldWallSize, numRows, numColumns,
 new Vector2(textureScaleX, textureScaleY),
 "WallTriangleVoxel");
-                                                else if (isWindow)
-                                                        voxelGO = VoxelBuildingUtility.CreateWindow(
+						else if (isWindow)
+							voxelGO = VoxelBuildingUtility.CreateWindow(
 cubeSize, worldPos, gx, gy, glassMaterial,
 cubeSize, vertexOffsets, worldWallSize,
 numRows, numColumns, new Vector2(textureScaleX, textureScaleY), "WallWindowVoxel");
-                                                else
-                                                        voxelGO = VoxelBuildingUtility.CreateIrregularCube(
+						else
+							voxelGO = VoxelBuildingUtility.CreateIrregularCube(
 cubeSize, worldPos, gx, gy, 0,
 defaultMat, cubeSize, vertexOffsets,
 worldWallSize, numRows, numColumns,
@@ -1127,16 +1126,23 @@ new Vector2(textureScaleX, textureScaleY),
 			{
 				BoxCollider windowCollider = Undo.AddComponent<BoxCollider>(combinedGO);
 				Vector3 original = windowCollider.size;
-				windowCollider.size = new Vector3(original.x, original.y, worldWallSize.z * 2);
+				windowCollider.size = new Vector3(original.x, original.y, 1);
 			}
 			else
 			{
 				Undo.AddComponent<MeshCollider>(combinedGO);
 			}
 
+			MeshFilter mfRoot = GetComponent<MeshFilter>();
+			if (!mfRoot) { return; }
+
+			Mesh srcMesh = mfRoot.sharedMesh;
+			Bounds b = srcMesh.bounds;
+			Vector3 scale = transform.localScale;
+			worldWallSize = Vector3.Scale(b.size, scale);
 			BoxCollider nonStaticCollider = Undo.AddComponent<BoxCollider>(combinedGO);
 			Vector3 boxSize = nonStaticCollider.size;
-			nonStaticCollider.size = new Vector3(boxSize.x * 0.7f, boxSize.y * 0.7f, boxSize.z);
+			nonStaticCollider.size = new Vector3(boxSize.x * 0.7f, boxSize.y * 0.7f, worldWallSize.z);
 			nonStaticCollider.isTrigger = true;
 
 			// ─────────────────────────────────────────────────────────────

@@ -823,7 +823,7 @@ namespace Mayuns.DSB.Editor
                 wall.WallPieceMass = buildSettings.wallPieceMass;
                 wall.wallPieceHealth = buildSettings.wallPieceHealth;
             }
-            wall.wallPieceWindowHealth = buildSettings.wallPieceWindowHealth;
+
             wall.textureScaleX = buildSettings.wallTextureScaleX;
             wall.textureScaleY = buildSettings.wallTextureScaleY;
 
@@ -1484,9 +1484,6 @@ namespace Mayuns.DSB.Editor
             // Add the WallManager script to the wall for functionality
             WallManager spawnedWall = Undo.AddComponent<WallManager>(wall);
 
-            spawnedWall.WallPieceMass = structuralGroup != null ? structuralGroup.wallPieceMass : buildSettings.wallPieceMass;
-            spawnedWall.wallPieceHealth = structuralGroup != null ? structuralGroup.wallPieceHealth : buildSettings.wallPieceHealth;
-            spawnedWall.wallPieceWindowHealth = buildSettings.wallPieceWindowHealth;
             spawnedWall.textureScaleX = buildSettings.wallTextureScaleX;
             spawnedWall.textureScaleY = buildSettings.wallTextureScaleY;
 
@@ -1499,6 +1496,8 @@ namespace Mayuns.DSB.Editor
 
             if (structuralGroup)
             {
+                spawnedWall.WallPieceMass = structuralGroup != null ? structuralGroup.wallPieceMass : buildSettings.wallPieceMass;
+                spawnedWall.wallPieceHealth = structuralGroup != null ? structuralGroup.wallPieceHealth : buildSettings.wallPieceHealth;
                 Undo.RecordObject(structuralGroup, "Add Wall to Structural Group");
                 structuralGroup.walls.Add(spawnedWall);
                 structuralGroup.walls.RemoveAll(walls => walls == null);

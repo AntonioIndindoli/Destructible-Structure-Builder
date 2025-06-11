@@ -54,14 +54,11 @@ namespace Mayuns.DSB
 
             accumulatedDamage += damage;
 
-            if (accumulatedDamage >= manager.wallPieceHealth && !isWindow)
+            if (accumulatedDamage >= manager.wallPieceHealth || (isWindow && accumulatedDamage >= manager.wallPieceHealth/10))
             {
                 HandleDestruction();
             }
-            else if (accumulatedDamage >= manager.wallPieceWindowHealth && isWindow)
-            {
-                HandleDestruction();
-            }
+
         }
 
         /// <summary>

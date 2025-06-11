@@ -19,10 +19,6 @@ namespace Mayuns.DSB
             if (piece.manager != null)
             {
                 EditorGUILayout.FloatField("Wall Piece Health", piece.manager.wallPieceHealth);
-                if (piece.isWindow)
-                {
-                    EditorGUILayout.FloatField("Window Health", piece.manager.wallPieceWindowHealth);
-                }
             }
             else
             {

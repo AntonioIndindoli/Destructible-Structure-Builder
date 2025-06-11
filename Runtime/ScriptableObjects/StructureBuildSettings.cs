@@ -38,7 +38,6 @@ namespace Mayuns.DSB
         public int wallRowCellCount = 5;
         public float wallPieceMass = 50f;
         public float wallPieceHealth = 100f;
-        public float wallPieceWindowHealth = 1f;
         public float wallTextureScaleX = 1f;
         public float wallTextureScaleY = 1f;
     }

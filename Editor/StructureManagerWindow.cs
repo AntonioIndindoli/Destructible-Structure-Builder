@@ -622,7 +622,6 @@ namespace Mayuns.DSB.Editor
             GUILayout.Label("Materials", EditorStyles.boldLabel);
             buildSettings.wallMaterial = (Material)EditorGUILayout.ObjectField("Wall Material", buildSettings.wallMaterial, typeof(Material), false);
             buildSettings.glassMaterial = (Material)EditorGUILayout.ObjectField("Wall Glass Material", buildSettings.glassMaterial, typeof(Material), false);
-            buildSettings.wallPieceWindowHealth = EditorGUILayout.FloatField("Window Piece Health", buildSettings.wallPieceWindowHealth);
             buildSettings.wallTextureScaleX = EditorGUILayout.FloatField("Wall Texture Scale X", buildSettings.wallTextureScaleX);
             buildSettings.wallTextureScaleY = EditorGUILayout.FloatField("Wall Texture Scale Y", buildSettings.wallTextureScaleY);
 
