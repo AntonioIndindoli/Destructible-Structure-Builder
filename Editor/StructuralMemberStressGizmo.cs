@@ -14,8 +14,15 @@ namespace Mayuns.DSB.Editor
         private static void DrawStress(StructuralMember member, GizmoType gizmoType)
         {
             if (!StressVisualizerState.IsEnabled ||
-                member == null || member.isDestroyed || member.isSplit ||member.isGrouped)
+                member == null || member.isDestroyed || member.isSplit || member.isGrouped)
                 return;
+
+            if (!Application.isPlaying)
+            {
+                var mgr = member.structuralGroup ? member.structuralGroup : member.GetComponentInParent<StructuralGroupManager>();
+                if (mgr)
+                    mgr.CalculateLoadsForEditor();
+            }
 
             /*────────── Colour calculation (same as before) ──────────*/
             float stress =

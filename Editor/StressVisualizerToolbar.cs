@@ -20,6 +20,13 @@ namespace Mayuns.DSB.Editor
             _enabled = !_enabled;
             StressVisualizerState.IsEnabled = _enabled;   // ‹— keep single source of truth
             Menu.SetChecked(kMenuPath, _enabled);
+
+            if (_enabled && !EditorApplication.isPlaying)
+            {
+                foreach (var mgr in Object.FindObjectsOfType<StructuralGroupManager>())
+                    mgr.CalculateLoadsForEditor();
+            }
+
             SceneView.RepaintAll();                      // ‹— instant feedback
         }
 
