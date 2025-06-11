@@ -28,7 +28,9 @@ namespace Mayuns.DSB
         {
             MemberDestroyed,
             WallDestroyed,
-            Crumble
+            Crumble,
+            MemberStress,
+            LargeCollapse
         }
 
         public EffectInfo[] effects;
@@ -58,6 +60,7 @@ namespace Mayuns.DSB
             {
                 audioSource = gameObject.AddComponent<AudioSource>();
             }
+            EnsureDefaultEffects();
         }
 
         void Update()
@@ -398,6 +401,7 @@ namespace Mayuns.DSB
             {
                 if (member != null && !member.isDestroyed && !member.isGrouped && !member.isSplit && !member.isGrounded)
                 {
+                    PlayMemberStressAt(member.transform.position);
                     member.DestroyRandomMemberPiece();
                     yield return new WaitForSeconds(delayBetween);
                 }
@@ -638,6 +642,11 @@ namespace Mayuns.DSB
                     Destroy(groupGO, gibManager.smallGibLifetime);
                 }
             }
+
+            if (structuralGroup.structuralMembersHash.Count > 4)
+            {
+                PlayLargeCollapseAt(groupGO.transform.position);
+            }
         }
 
         void OnCollisionEnter(Collision collision)
@@ -673,6 +682,26 @@ namespace Mayuns.DSB
             PlayEffects(EffectType.Crumble, position);
         }
 
+        public void PlayMemberStress()
+        {
+            PlayEffects(EffectType.MemberStress, transform.position);
+        }
+
+        public void PlayMemberStressAt(Vector3 position)
+        {
+            PlayEffects(EffectType.MemberStress, position);
+        }
+
+        public void PlayLargeCollapse()
+        {
+            PlayEffects(EffectType.LargeCollapse, transform.position);
+        }
+
+        public void PlayLargeCollapseAt(Vector3 position)
+        {
+            PlayEffects(EffectType.LargeCollapse, position);
+        }
+
         private void PlayEffects(EffectType type, Vector3 position)
         {
             if (effects == null) return;
@@ -703,6 +732,48 @@ namespace Mayuns.DSB
 
                 break;
             }
+        }
+
+        private void EnsureDefaultEffects()
+        {
+            var effectList = effects != null ? new List<EffectInfo>(effects) : new List<EffectInfo>();
+
+            void AddIfMissing(EffectType type, string[] clipNames)
+            {
+                if (effectList.Any(e => e.type == type)) return;
+
+                var info = new EffectInfo();
+                info.type = type;
+                var clips = new List<AudioClip>();
+                foreach (var name in clipNames)
+                {
+                    var clip = Resources.Load<AudioClip>("SoundEffects/" + name);
+                    if (clip != null)
+                        clips.Add(clip);
+                }
+                info.clips = clips.ToArray();
+                info.volume = 1f;
+                info.particlePrefabs = null;
+                effectList.Add(info);
+            }
+
+            AddIfMissing(EffectType.MemberStress, new[]
+            {
+                "Member_Stress_Default1",
+                "Member_Stress_Default2",
+                "Member_Stress_Default3"
+            });
+
+            AddIfMissing(EffectType.LargeCollapse, new[]
+            {
+                "Large_Collapse_Default1",
+                "Large_Collapse_Default2",
+                "Large_Collapse_Default3",
+                "Large_Collapse_Default4",
+                "Large_Collapse_Default5"
+            });
+
+            effects = effectList.ToArray();
         }
 
         private Vector3 CalculateGroupCenter(HashSet<StructuralMember> Members)
