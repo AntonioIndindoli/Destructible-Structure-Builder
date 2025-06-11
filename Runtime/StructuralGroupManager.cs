@@ -766,6 +766,22 @@ namespace Mayuns.DSB
                 "Large_Collapse_Default5"
             });
 
+            AddIfMissing(EffectType.MemberDestroyed, new[]
+            {
+                "Crumble_Default1",
+                "Crumble_Default2",
+                "Crumble_Default3",
+                "Crumble_Default4"
+            });
+
+            AddIfMissing(EffectType.WallDestroyed, new[]
+            {
+                "Crumble_Default1",
+                "Crumble_Default2",
+                "Crumble_Default3",
+                "Crumble_Default4"
+            });
+
             effects = effectList.ToArray();
         }
 
