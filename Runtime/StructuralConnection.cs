@@ -138,15 +138,18 @@ namespace Mayuns.DSB
 
         void Start() => CreateAndStoreDebrisData(1, false);
 
+        /// <summary>
+        /// Remove this connection when no members remain attached.
+        /// </summary>
         public void SelfDestructCheck()
         {
-            if (GetMembers().Count == 0) Destroy(gameObject);
-            else if (GetMembers().Count == 0)
-            {
-                DestroyConnection();
-            }
+            if (GetMembers().Count == 0)
+                Destroy(gameObject);
         }
 
+        /// <summary>
+        /// Apply damage and destroy the connection when its health reaches zero.
+        /// </summary>
         public void TakeDamage(float damage)
         {
             if (isDestroyed) return;
