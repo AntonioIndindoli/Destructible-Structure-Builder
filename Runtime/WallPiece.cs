@@ -3,6 +3,9 @@ using UnityEngine.Events;
 
 namespace Mayuns.DSB
 {
+    /// <summary>
+    /// Single cell of a wall grid that can be damaged or destroyed.
+    /// </summary>
     public class WallPiece : Destructible, IDamageable
     {
         [HideInInspector] public bool isDestroyed = false;
@@ -30,14 +33,21 @@ namespace Mayuns.DSB
 
         void Start()
         {
+            // Prepare debris data so runtime destruction has no delay
             CreateAndStoreDebrisData(1, isWindow);
         }
         
+        /// <summary>
+        /// Convenience helper to destroy the piece instantly.
+        /// </summary>
         public void DestroyWallPiece()
         {
             TakeDamage(manager.wallPieceHealth);
         }
 
+        /// <summary>
+        /// Apply damage and check for destruction thresholds.
+        /// </summary>
         public void TakeDamage(float damage)
         {
             if (isDestroyed || isProxy) return;
@@ -54,6 +64,10 @@ namespace Mayuns.DSB
             }
         }
 
+        /// <summary>
+        /// Called when the damage threshold has been exceeded.
+        /// Spawns debris and notifies the owning wall.
+        /// </summary>
         private void HandleDestruction()
         {
             isDestroyed = true;

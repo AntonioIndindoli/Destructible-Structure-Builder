@@ -5,22 +5,32 @@ using UnityEngine.Events;
 
 namespace Mayuns.DSB
 {
+    /// <summary>
+    /// Base behaviour for all objects that can break apart into debris.
+    /// </summary>
     public abstract class Destructible : MonoBehaviour
     {
+        // Cached debris information generated at build time.
         [HideInInspector] public DebrisData[] gibs;
         private GibManager gibManager;
         [Header("Destruction Events")]
         public UnityEvent onCrumble;
 
+        /// <summary>
+        /// Locate the global <see cref="GibManager"/> so debris can be spawned
+        /// when this object breaks.
+        /// </summary>
         void Awake()
         {
-            // GibManager must be present in scene for gibs to spawn
             if (gibManager == null && GibManager.Instance != null)
             {
                 gibManager = GibManager.Instance;
             }
         }
 
+        /// <summary>
+        /// Pre-compute meshes that will be used when the object crumbles.
+        /// </summary>
         public virtual void CreateAndStoreDebrisData(int cutCascades, bool isWindow)
         {
             var debrisDataList = GibBuildingUtility.CreateDebris(gameObject, cutCascades, isWindow);
@@ -30,7 +40,7 @@ namespace Mayuns.DSB
                 return;
             }
 
-            // Filter out null or invalid mesh data (e.g., mesh is empty)
+            // Discard any mesh with no vertices to avoid spawning empty debris
             var validData = new List<DebrisData>();
             foreach (var data in debrisDataList)
             {
@@ -43,6 +53,9 @@ namespace Mayuns.DSB
             gibs = validData.ToArray();
         }
 
+        /// <summary>
+        /// Spawn precomputed debris pieces and destroy this object.
+        /// </summary>
         public virtual void Crumble()
         {
             if (gibs == null || gibs.Length == 0)
@@ -62,11 +75,10 @@ namespace Mayuns.DSB
 
             foreach (DebrisData data in gibs)
             {
-                // Decide whether to spawn gibs or not
+                // Skip empty meshes and throttle spawn rate based on the current load
                 if (data.sharedMesh == null || data.sharedMesh.vertexCount == 0 || Random.value > spawnChance || gibManager == null)
                     continue;
 
-                // Spawn gibs using pool
                 GameObject gib = GibManager.Instance.GetReusableGibShell(data, transform.position, transform.rotation);
                 if (gib != null)
                 {
@@ -75,8 +87,8 @@ namespace Mayuns.DSB
                 }
             }
 
+            // Notify listeners and remove this object from the scene
             onCrumble?.Invoke();
-
             Destroy(gameObject);
         }
     }
