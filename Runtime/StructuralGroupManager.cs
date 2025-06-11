@@ -19,7 +19,7 @@ namespace Mayuns.DSB
         {
             public EffectType type;
             public AudioClip[] clips;
-            [Range(0f,1f)]
+            [Range(0f, 1f)]
             public float volume = 1f;
             public GameObject[] particlePrefabs;
         }
@@ -118,20 +118,24 @@ namespace Mayuns.DSB
                     hasGibManager = true;
                 }
 
-                structuralMembers.RemoveAll(m => m == null);
-                memberConnections.RemoveAll(m => m == null);
-                walls.RemoveAll(m => m == null);
-                structuralMembersHash = new HashSet<StructuralMember>(structuralMembers);
-                memberConnectionsHash = new HashSet<StructuralConnection>(memberConnections);
-                WallManager[] wallsArray = GetComponentsInChildren<WallManager>();
-                wallsHash = new HashSet<WallManager>(wallsArray);
-
+                RefreshHash();
                 UpdateCurrentMinDistancesToGround(true);
                 PropagateStructuralLoads(true);
 
                 // Ensure members and connections do not generate self-collisions
                 IgnoreInternalCollisions();
             }
+        }
+
+        void RefreshHash()
+        {
+            structuralMembers.RemoveAll(m => m == null);
+            memberConnections.RemoveAll(m => m == null);
+            walls.RemoveAll(m => m == null);
+            structuralMembersHash = new HashSet<StructuralMember>(structuralMembers);
+            memberConnectionsHash = new HashSet<StructuralConnection>(memberConnections);
+            WallManager[] wallsArray = GetComponentsInChildren<WallManager>();
+            wallsHash = new HashSet<WallManager>(wallsArray);
         }
 
         void IgnoreInternalCollisions()
@@ -726,6 +730,7 @@ namespace Mayuns.DSB
             if (structuralMembers == null || structuralMembers.Count == 0)
                 return;
 
+            RefreshHash();
             UpdateCurrentMinDistancesToGround(true);
 
             foreach (var member in structuralMembers)
