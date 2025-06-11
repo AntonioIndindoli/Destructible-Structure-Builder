@@ -19,6 +19,7 @@ namespace Mayuns.DSB
         [HideInInspector] public float accumulatedDamage = 0;
         [Header("Destruction Events")]
         public UnityEvent onDestroyed;
+        public UnityEvent onWindowShatter;
         public enum TriangularCornerDesignation
         {
             None,
@@ -68,6 +69,15 @@ namespace Mayuns.DSB
         private void HandleDestruction()
         {
             isDestroyed = true;
+
+            if (isWindow)
+            {
+                onWindowShatter?.Invoke();
+                if (manager != null && manager.structuralGroup != null)
+                {
+                    manager.structuralGroup.PlayWindowShatterAt(transform.position);
+                }
+            }
 
             onDestroyed?.Invoke();
             if (manager != null && manager.structuralGroup != null)
