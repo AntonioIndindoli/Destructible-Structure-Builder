@@ -14,6 +14,25 @@ namespace Mayuns.DSB
         public float minPropagationTime = 0f;
         public float maxPropagationTime = 3f;
         public float pieceMass = 10f;
+        [System.Serializable]
+        public class EffectInfo
+        {
+            public EffectType type;
+            public AudioClip[] clips;
+            [Range(0f,1f)]
+            public float volume = 1f;
+            public GameObject[] particlePrefabs;
+        }
+
+        public enum EffectType
+        {
+            MemberDestroyed,
+            WallDestroyed,
+            Crumble
+        }
+
+        public EffectInfo[] effects;
+        private AudioSource audioSource;
         [HideInInspector] public StructureBuildSettings buildSettings;
         [HideInInspector] public bool isDetached = false;
         [HideInInspector] public List<StructuralMember> structuralMembers = new List<StructuralMember>();
@@ -31,6 +50,15 @@ namespace Mayuns.DSB
         private float lastCollisionTime = -10f;
         private float cleanupTimer = 0f;
         private const float cleanupInterval = 5f;
+
+        void Awake()
+        {
+            audioSource = GetComponent<AudioSource>();
+            if (audioSource == null)
+            {
+                audioSource = gameObject.AddComponent<AudioSource>();
+            }
+        }
 
         void Update()
         {
@@ -618,7 +646,59 @@ namespace Mayuns.DSB
             if (impactForce < 200f) return; // Throttle weak collisions
 
             Vector3 impactPoint = collision.contacts[0].point;
+            PlayCrumbleAt(impactPoint);
+        }
 
+        public void PlayMemberDestroyed()
+        {
+            PlayEffects(EffectType.MemberDestroyed, transform.position);
+        }
+
+        public void PlayWallDestroyed()
+        {
+            PlayEffects(EffectType.WallDestroyed, transform.position);
+        }
+
+        public void PlayCrumble()
+        {
+            PlayEffects(EffectType.Crumble, transform.position);
+        }
+
+        public void PlayCrumbleAt(Vector3 position)
+        {
+            PlayEffects(EffectType.Crumble, position);
+        }
+
+        private void PlayEffects(EffectType type, Vector3 position)
+        {
+            if (effects == null) return;
+
+            foreach (var effect in effects)
+            {
+                if (effect.type != type) continue;
+
+                if (audioSource != null && effect.clips != null && effect.clips.Length > 0)
+                {
+                    AudioClip clip = effect.clips[Random.Range(0, effect.clips.Length)];
+                    if (clip != null)
+                    {
+                        audioSource.PlayOneShot(clip, effect.volume);
+                    }
+                }
+
+                if (effect.particlePrefabs != null)
+                {
+                    foreach (var prefab in effect.particlePrefabs)
+                    {
+                        if (prefab != null)
+                        {
+                            Instantiate(prefab, position, Quaternion.identity);
+                        }
+                    }
+                }
+
+                break;
+            }
         }
 
         private Vector3 CalculateGroupCenter(HashSet<StructuralMember> Members)

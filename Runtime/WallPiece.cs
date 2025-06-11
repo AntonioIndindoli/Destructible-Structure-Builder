@@ -59,6 +59,10 @@ namespace Mayuns.DSB
             isDestroyed = true;
 
             onDestroyed?.Invoke();
+            if (manager != null && manager.structuralGroup != null)
+            {
+                manager.structuralGroup.PlayWallDestroyed();
+            }
 
             if (manager != null)
             {
@@ -67,6 +71,10 @@ namespace Mayuns.DSB
             }
 
             Crumble();
+            if (manager != null && manager.structuralGroup != null)
+            {
+                manager.structuralGroup.PlayCrumble();
+            }
         }
 
     }
