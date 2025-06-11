@@ -8,8 +8,6 @@ namespace Mayuns.DSB
     {
         public override void OnInspectorGUI()
         {
-            base.OnInspectorGUI();
-
             var piece = (MemberPiece)target;
 
             EditorGUILayout.Space();

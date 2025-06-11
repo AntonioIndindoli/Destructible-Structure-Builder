@@ -34,7 +34,7 @@ namespace Mayuns.DSB
         }
 
         public EffectInfo[] effects;
-        private AudioSource audioSource;
+        [HideInInspector] public AudioSource audioSource;
         [HideInInspector] public StructureBuildSettings buildSettings;
         [HideInInspector] public bool isDetached = false;
         [HideInInspector] public List<StructuralMember> structuralMembers = new List<StructuralMember>();
@@ -52,16 +52,6 @@ namespace Mayuns.DSB
         private float lastCollisionTime = -10f;
         private float cleanupTimer = 0f;
         private const float cleanupInterval = 5f;
-
-        void Awake()
-        {
-            audioSource = GetComponent<AudioSource>();
-            if (audioSource == null)
-            {
-                audioSource = gameObject.AddComponent<AudioSource>();
-            }
-            EnsureDefaultEffects();
-        }
 
         void Update()
         {
@@ -734,7 +724,7 @@ namespace Mayuns.DSB
             }
         }
 
-        private void EnsureDefaultEffects()
+        public void EnsureDefaultEffects()
         {
             var effectList = effects != null ? new List<EffectInfo>(effects) : new List<EffectInfo>();
 
@@ -902,6 +892,12 @@ namespace Mayuns.DSB
                     }
                 }
             }
+            audioSource = GetComponent<AudioSource>();
+            if (audioSource == null)
+            {
+                audioSource = gameObject.AddComponent<AudioSource>();
+            }
+            EnsureDefaultEffects();
         }
 #endif
     }

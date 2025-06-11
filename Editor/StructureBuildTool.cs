@@ -315,6 +315,12 @@ namespace Mayuns.DSB.Editor
                 structuralGroup.minPropagationTime = buildSettings.minPropagationTime;
                 structuralGroup.maxPropagationTime = buildSettings.maxPropagationTime;
                 structuralGroup.buildSettings = buildSettings;
+                structuralGroup.audioSource = structuralGroup.GetComponent<AudioSource>();
+                if (structuralGroup.audioSource == null)
+                {
+                    structuralGroup.audioSource = structuralGroup.gameObject.AddComponent<AudioSource>();
+                }
+                structuralGroup.EnsureDefaultEffects();
                 connectionGO.AddComponent<BoxCollider>();
 
                 Debug.Log($"New structure created at {spawnPosition}");

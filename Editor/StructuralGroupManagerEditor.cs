@@ -16,8 +16,8 @@ namespace Mayuns.DSB.Editor
 
             // Strength Modifier with Tooltip
             GUIContent strengthLabel = new GUIContent(
-                "Strength Modifier",
-                "This value increases the support capacity of all structural members during the initial load propagation phase. Higher values make the structure more stable."
+                "Global Member Support Capacity Adjustment",
+                "This value modifies the support capacity of all structural members in the structure during the initial load propagation phase. Higher values make the structure more stable."
             );
 
             EditorGUI.BeginChangeCheck(); // Track changes

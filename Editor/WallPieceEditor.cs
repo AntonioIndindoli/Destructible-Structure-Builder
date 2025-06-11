@@ -8,12 +8,13 @@ namespace Mayuns.DSB
     {
         public override void OnInspectorGUI()
         {
-            base.OnInspectorGUI(); // Draw default fields
-
             WallPiece piece = (WallPiece)target;
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Wall Piece Debug Info", EditorStyles.boldLabel);
+
+            if (piece.manager == null)
+                piece.manager = piece.GetComponentInParent<WallManager>();
 
             if (piece.manager != null)
             {
