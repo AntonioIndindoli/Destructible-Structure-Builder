@@ -13,7 +13,10 @@ namespace Mayuns.DSB
         public int strengthModifier;
         public float minPropagationTime = 0f;
         public float maxPropagationTime = 3f;
-        public float pieceMass = 10f;
+        public float memberPieceMass = 10f;
+        public float memberPieceHealth = 100f;
+        public float wallPieceMass = 50f;
+        public float wallPieceHealth = 100f;
         [System.Serializable]
         public class EffectInfo
         {
@@ -821,12 +824,12 @@ namespace Mayuns.DSB
             }
         }
 
-        public void ApplyPieceMass(float newMass)
+        public void ApplyMemberPieceMass(float newMass)
         {
-            if (Mathf.Approximately(pieceMass, 0f))
-                pieceMass = 1f;
+            if (Mathf.Approximately(memberPieceMass, 0f))
+                memberPieceMass = 1f;
 
-            float ratio = newMass / pieceMass;
+            float ratio = newMass / memberPieceMass;
 
             foreach (var member in structuralMembers)
             {
@@ -844,8 +847,58 @@ namespace Mayuns.DSB
                 EditorUtility.SetDirty(wall);
             }
 
-            Undo.RecordObject(this, "Change Piece Mass");
-            pieceMass = newMass;
+            Undo.RecordObject(this, "Change Member Piece Mass");
+            memberPieceMass = newMass;
+            EditorUtility.SetDirty(this);
+        }
+
+        public void ApplyWallPieceMass(float newMass)
+        {
+            if (Mathf.Approximately(wallPieceMass, 0f))
+                wallPieceMass = 1f;
+
+            float ratio = newMass / wallPieceMass;
+
+            foreach (var wall in walls)
+            {
+                if (wall == null) continue;
+                Undo.RecordObject(wall, "Change Wall Piece Mass");
+                wall.WallPieceMass *= ratio;
+                EditorUtility.SetDirty(wall);
+            }
+
+            Undo.RecordObject(this, "Change Wall Piece Mass");
+            wallPieceMass = newMass;
+            EditorUtility.SetDirty(this);
+        }
+
+        public void ApplyMemberPieceHealth(float newHealth)
+        {
+            foreach (var member in structuralMembers)
+            {
+                if (member == null) continue;
+                Undo.RecordObject(member, "Change Member Piece Health");
+                member.memberPieceHealth = newHealth;
+                EditorUtility.SetDirty(member);
+            }
+
+            Undo.RecordObject(this, "Change Member Piece Health");
+            memberPieceHealth = newHealth;
+            EditorUtility.SetDirty(this);
+        }
+
+        public void ApplyWallPieceHealth(float newHealth)
+        {
+            foreach (var wall in walls)
+            {
+                if (wall == null) continue;
+                Undo.RecordObject(wall, "Change Wall Piece Health");
+                wall.wallPieceHealth = newHealth;
+                EditorUtility.SetDirty(wall);
+            }
+
+            Undo.RecordObject(this, "Change Wall Piece Health");
+            wallPieceHealth = newHealth;
             EditorUtility.SetDirty(this);
         }
 

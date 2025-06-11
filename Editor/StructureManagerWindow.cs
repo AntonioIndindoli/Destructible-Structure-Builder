@@ -594,8 +594,6 @@ namespace Mayuns.DSB.Editor
             GUILayout.Label("Structural Member Settings", EditorStyles.boldLabel);
             buildSettings.memberLength = EditorGUILayout.FloatField("Member Length", buildSettings.memberLength);
             buildSettings.memberThickness = EditorGUILayout.FloatField("Member Thickness", buildSettings.memberThickness);
-            buildSettings.memberMass = EditorGUILayout.FloatField("Member Mass", buildSettings.memberMass);
-            buildSettings.memberPieceHealth = EditorGUILayout.FloatField("Member Piece Health", buildSettings.memberPieceHealth);
             buildSettings.memberTextureScaleX = EditorGUILayout.FloatField("Member Texture Scale X", buildSettings.memberTextureScaleX);
             buildSettings.memberTextureScaleY = EditorGUILayout.FloatField("Member Texture Scale Y", buildSettings.memberTextureScaleY);
             buildSettings.memberSupportCapacity = EditorGUILayout.FloatField("Member Support Capacity", buildSettings.memberSupportCapacity);
@@ -624,8 +622,6 @@ namespace Mayuns.DSB.Editor
             GUILayout.Label("Materials", EditorStyles.boldLabel);
             buildSettings.wallMaterial = (Material)EditorGUILayout.ObjectField("Wall Material", buildSettings.wallMaterial, typeof(Material), false);
             buildSettings.glassMaterial = (Material)EditorGUILayout.ObjectField("Wall Glass Material", buildSettings.glassMaterial, typeof(Material), false);
-            buildSettings.wallPieceMass = EditorGUILayout.FloatField("Wall Piece Mass", buildSettings.wallPieceMass);
-            buildSettings.wallPieceHealth = EditorGUILayout.FloatField("Wall Piece Health", buildSettings.wallPieceHealth);
             buildSettings.wallPieceWindowHealth = EditorGUILayout.FloatField("Window Piece Health", buildSettings.wallPieceWindowHealth);
             buildSettings.wallTextureScaleX = EditorGUILayout.FloatField("Wall Texture Scale X", buildSettings.wallTextureScaleX);
             buildSettings.wallTextureScaleY = EditorGUILayout.FloatField("Wall Texture Scale Y", buildSettings.wallTextureScaleY);
@@ -643,6 +639,12 @@ namespace Mayuns.DSB.Editor
             EditorGUILayout.Space(10);
             GUILayout.Label("Structural Strength", EditorStyles.boldLabel);
             buildSettings.strengthModifier = EditorGUILayout.IntField("Member Support Capacity Modifier", buildSettings.strengthModifier);
+            EditorGUILayout.Space(10);
+            GUILayout.Label("Initial Piece Settings", EditorStyles.boldLabel);
+            buildSettings.memberMass = EditorGUILayout.FloatField("Member Piece Mass", buildSettings.memberMass);
+            buildSettings.memberPieceHealth = EditorGUILayout.FloatField("Member Piece Health", buildSettings.memberPieceHealth);
+            buildSettings.wallPieceMass = EditorGUILayout.FloatField("Wall Piece Mass", buildSettings.wallPieceMass);
+            buildSettings.wallPieceHealth = EditorGUILayout.FloatField("Wall Piece Health", buildSettings.wallPieceHealth);
             EditorGUILayout.Space(10);
             EditorGUILayout.LabelField("Stress Damage Propagation Timing", EditorStyles.boldLabel);
 
