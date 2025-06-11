@@ -53,7 +53,6 @@ namespace Mayuns.DSB
         [HideInInspector] public float validationDuration = 0f;
         [HideInInspector] public float validationInterval = .1f;
         private float validationCooldown = 0f;
-        private float lastCollisionTime = -10f;
         private float cleanupTimer = 0f;
         private const float cleanupInterval = 5f;
 
@@ -658,38 +657,10 @@ namespace Mayuns.DSB
                 }
             }
 
-            if (structuralGroup.structuralMembersHash.Count > 4)
-            {
-                PlayLargeCollapseAt(groupGO.transform.position);
-            }
-        }
+            float tVal = Mathf.InverseLerp(1f, 50f, structuralGroup.structuralMembersHash.Count);
+            float collapseVolume = Mathf.Lerp(0.1f, 1f, tVal);
 
-        void OnCollisionEnter(Collision collision)
-        {
-            // Throttle: Only process if sufficient time since last
-            if (Time.time - lastCollisionTime < collisionCooldown) return;
-            lastCollisionTime = Time.time;
-
-            float impactForce = collision.impulse.magnitude / Time.fixedDeltaTime;
-            if (impactForce < 200f) return; // Throttle weak collisions
-
-            Vector3 impactPoint = collision.contacts[0].point;
-            PlayCrumbleAt(impactPoint);
-        }
-
-        public void PlayMemberDestroyed()
-        {
-            PlayEffects(EffectType.MemberDestroyed, transform.position);
-        }
-
-        public void PlayWallDestroyed()
-        {
-            PlayEffects(EffectType.WallDestroyed, transform.position);
-        }
-
-        public void PlayCrumble()
-        {
-            PlayEffects(EffectType.Crumble, transform.position);
+            PlayLargeCollapseAt(groupGO.transform.position, collapseVolume);
         }
 
         public void PlayCrumbleAt(Vector3 position)
@@ -697,37 +668,27 @@ namespace Mayuns.DSB
             PlayEffects(EffectType.Crumble, position);
         }
 
-        public void PlayMemberStress()
-        {
-            PlayEffects(EffectType.MemberStress, transform.position);
-        }
-
         public void PlayMemberStressAt(Vector3 position)
         {
             PlayEffects(EffectType.MemberStress, position);
         }
 
-        public void PlayLargeCollapse()
+        public void PlayLargeCollapseAt(Vector3 position, float volumeScale)
         {
-            PlayEffects(EffectType.LargeCollapse, transform.position);
-        }
-
-        public void PlayLargeCollapseAt(Vector3 position)
-        {
-            PlayEffects(EffectType.LargeCollapse, position);
-        }
-
-        public void PlayWindowShatter()
-        {
-            PlayEffects(EffectType.WindowShatter, transform.position);
+            PlayEffects(EffectType.LargeCollapse, position, volumeScale);
         }
 
         public void PlayWindowShatterAt(Vector3 position)
         {
             PlayEffects(EffectType.WindowShatter, position);
         }
-
+        
         private void PlayEffects(EffectType type, Vector3 position)
+        {
+            PlayEffects(type, position, 1f);
+        }
+
+        private void PlayEffects(EffectType type, Vector3 position, float volumeScale)
         {
             if (effects == null) return;
 
@@ -740,7 +701,7 @@ namespace Mayuns.DSB
                     AudioClip clip = effect.clips[Random.Range(0, effect.clips.Length)];
                     if (clip != null)
                     {
-                        audioSource.PlayOneShot(clip, effect.volume);
+                        audioSource.PlayOneShot(clip, effect.volume * volumeScale);
                     }
                 }
 

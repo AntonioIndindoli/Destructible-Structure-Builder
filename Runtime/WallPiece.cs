@@ -9,7 +9,7 @@ namespace Mayuns.DSB
     public class WallPiece : Destructible, IDamageable
     {
         [HideInInspector] public bool isDestroyed = false;
-        [HideInInspector] public WallManager manager;
+         public WallManager manager;
         [HideInInspector] public StructuralMember attachedMember;
         [HideInInspector] public MemberPiece closestMemberPiece;
         [HideInInspector] public Vector2Int gridPosition;
@@ -17,7 +17,6 @@ namespace Mayuns.DSB
         [HideInInspector] public bool isEdge = false;
         [HideInInspector] public bool isProxy = false;
         [HideInInspector] public float accumulatedDamage = 0;
-        [Header("Destruction Events")]
         public UnityEvent onDestroyed;
         public UnityEvent onWindowShatter;
         public enum TriangularCornerDesignation
@@ -37,7 +36,7 @@ namespace Mayuns.DSB
             // Prepare debris data so runtime destruction has no delay
             CreateAndStoreDebrisData(1, isWindow);
         }
-        
+
         /// <summary>
         /// Convenience helper to destroy the piece instantly.
         /// </summary>
@@ -55,7 +54,7 @@ namespace Mayuns.DSB
 
             accumulatedDamage += damage;
 
-            if (accumulatedDamage >= manager.wallPieceHealth || (isWindow && accumulatedDamage >= manager.wallPieceHealth/10))
+            if (accumulatedDamage >= manager.wallPieceHealth || (isWindow && accumulatedDamage >= (manager.wallPieceHealth*.1f)))
             {
                 HandleDestruction();
             }
@@ -78,11 +77,13 @@ namespace Mayuns.DSB
                     manager.structuralGroup.PlayWindowShatterAt(transform.position);
                 }
             }
-
-            onDestroyed?.Invoke();
-            if (manager != null && manager.structuralGroup != null)
+            else
             {
-                manager.structuralGroup.PlayWallDestroyed();
+                onDestroyed?.Invoke();
+                if (manager != null && manager.structuralGroup != null)
+                {
+                    manager.structuralGroup.PlayCrumbleAt(transform.position);
+                }
             }
 
             if (manager != null)
@@ -92,10 +93,7 @@ namespace Mayuns.DSB
             }
 
             Crumble();
-            if (manager != null && manager.structuralGroup != null)
-            {
-                manager.structuralGroup.PlayCrumble();
-            }
+
         }
 
     }

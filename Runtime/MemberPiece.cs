@@ -45,7 +45,7 @@ namespace Mayuns.DSB
                 onDestroyed?.Invoke();
                 if (member != null && member.structuralGroup != null)
                 {
-                    member.structuralGroup.PlayMemberDestroyed();
+                    member.structuralGroup.PlayCrumbleAt(transform.position);
                 }
 
                 if (member != null)
@@ -58,10 +58,6 @@ namespace Mayuns.DSB
                 }
 
                 Crumble();
-                if (member != null && member.structuralGroup != null)
-                {
-                    member.structuralGroup.PlayCrumble();
-                }
             }
         }
 

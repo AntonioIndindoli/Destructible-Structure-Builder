@@ -114,11 +114,7 @@ namespace Mayuns.DSB
 			var piece = combinedGO.GetComponent<WallPiece>();
 
 			// If it is a window chunk, shatter into pieces instead of detaching
-			if (piece != null && piece.isWindow)
-			{
-				StartCoroutine(ApplyUncombinedDamageOverTime(chunk, int.MaxValue));
-			}
-			else
+			if (piece != null)
 			{
 				// Detach from wall hierarchy
 				combinedGO.transform.SetParent(null, true);
@@ -141,6 +137,30 @@ namespace Mayuns.DSB
 					rb.angularVelocity = sourceRb.angularVelocity;
 				}
 
+				foreach (GameObject wallPiece in chunk.wallPieces)
+				{
+					if (wallPiece)
+					{
+						var wp = wallPiece.GetComponent<WallPiece>();
+						if (wp != null && wp.isWindow)
+						{
+							wallPiece.SetActive(true);
+							wallPiece.hideFlags = HideFlags.None;
+
+							if (wp)
+							{
+								wp.TakeDamage(int.MaxValue);
+							}
+						}
+						if (wp != null)
+						{
+							var pos = wp.gridPosition;
+							int idx = pos.x + pos.y * numColumns;
+							wallGrid[idx] = null;
+						}
+					}
+				}
+
 				// Disable proxy logic
 				var proxy = combinedGO.GetComponent<Chunk>();
 				if (proxy != null)
@@ -151,12 +171,6 @@ namespace Mayuns.DSB
 				if (piece != null)
 				{
 					Destroy(piece);
-				}
-				foreach (GameObject wallPiece in chunk.wallPieces)
-				{
-					var pos = wallPiece.GetComponent<WallPiece>().gridPosition;
-					int idx = pos.x + pos.y * numColumns;
-					wallGrid[idx] = null;
 				}
 
 				if (structuralGroup != null && structuralGroup.gibManager != null)
@@ -1137,19 +1151,17 @@ namespace Mayuns.DSB
 			else
 			{
 				Undo.AddComponent<MeshCollider>(combinedGO);
+
+				MeshFilter mfRoot = GetComponent<MeshFilter>();
+				Mesh srcMesh = mfRoot.sharedMesh;
+				Bounds b = srcMesh.bounds;
+				Vector3 scale = transform.localScale;
+				worldWallSize = Vector3.Scale(b.size, scale);
+				BoxCollider nonStaticCollider = Undo.AddComponent<BoxCollider>(combinedGO);
+				Vector3 boxSize = nonStaticCollider.size;
+				nonStaticCollider.size = new Vector3(boxSize.x * 0.7f, boxSize.y * 0.7f, worldWallSize.z);
+				nonStaticCollider.isTrigger = true;
 			}
-
-			MeshFilter mfRoot = GetComponent<MeshFilter>();
-			if (!mfRoot) { return; }
-
-			Mesh srcMesh = mfRoot.sharedMesh;
-			Bounds b = srcMesh.bounds;
-			Vector3 scale = transform.localScale;
-			worldWallSize = Vector3.Scale(b.size, scale);
-			BoxCollider nonStaticCollider = Undo.AddComponent<BoxCollider>(combinedGO);
-			Vector3 boxSize = nonStaticCollider.size;
-			nonStaticCollider.size = new Vector3(boxSize.x * 0.7f, boxSize.y * 0.7f, worldWallSize.z);
-			nonStaticCollider.isTrigger = true;
 
 			// ─────────────────────────────────────────────────────────────
 			// CHUNK COMPONENT
