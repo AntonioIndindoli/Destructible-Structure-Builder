@@ -32,6 +32,10 @@ namespace Mayuns.DSB
                 isDestroyed = true;
 
                 onDestroyed?.Invoke();
+                if (member != null && member.structuralGroup != null)
+                {
+                    member.structuralGroup.PlayMemberDestroyed();
+                }
 
                 if (member != null)
                 {
@@ -39,11 +43,15 @@ namespace Mayuns.DSB
                     // tell the member a voxel is gone
                     int idx = System.Array.IndexOf(member.memberPieces, gameObject);
                     member.memberPieces[idx] = null;
-                    member.AdjustNeighboursAfterDestruction(idx);
-                    member.SelfDestructCheck();
-                }
+                member.AdjustNeighboursAfterDestruction(idx);
+                member.SelfDestructCheck();
+            }
 
                 Crumble();
+                if (member != null && member.structuralGroup != null)
+                {
+                    member.structuralGroup.PlayCrumble();
+                }
             }
         }
 
