@@ -33,7 +33,8 @@ namespace Mayuns.DSB
             WallDestroyed,
             Crumble,
             MemberStress,
-            LargeCollapse
+            LargeCollapse,
+            WindowShatter
         }
 
         public EffectInfo[] effects;
@@ -716,6 +717,16 @@ namespace Mayuns.DSB
             PlayEffects(EffectType.LargeCollapse, position);
         }
 
+        public void PlayWindowShatter()
+        {
+            PlayEffects(EffectType.WindowShatter, transform.position);
+        }
+
+        public void PlayWindowShatterAt(Vector3 position)
+        {
+            PlayEffects(EffectType.WindowShatter, position);
+        }
+
         private void PlayEffects(EffectType type, Vector3 position)
         {
             if (effects == null) return;
@@ -801,6 +812,14 @@ namespace Mayuns.DSB
                 "Crumble_Default2",
                 "Crumble_Default3",
                 "Crumble_Default4"
+            });
+
+            AddIfMissing(EffectType.WindowShatter, new[]
+            {
+                "Window_Shatter_Default1",
+                "Window_Shatter_Default2",
+                "Window_Shatter_Default3",
+                "Window_Shatter_Default4"
             });
 
             effects = effectList.ToArray();
