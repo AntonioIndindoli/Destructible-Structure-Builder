@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using static Mayuns.DSB.GibBuildingUtility;
+using UnityEngine.Events;
 
 namespace Mayuns.DSB
 {
@@ -8,6 +9,8 @@ namespace Mayuns.DSB
     {
         [HideInInspector] public DebrisData[] gibs;
         private GibManager gibManager;
+        [Header("Destruction Events")]
+        public UnityEvent onCrumble;
 
         void Awake()
         {
@@ -71,6 +74,8 @@ namespace Mayuns.DSB
                     gib.transform.SetParent(null);
                 }
             }
+
+            onCrumble?.Invoke();
 
             Destroy(gameObject);
         }

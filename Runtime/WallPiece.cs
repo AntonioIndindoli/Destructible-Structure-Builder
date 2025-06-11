@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Mayuns.DSB
 {
@@ -13,6 +14,8 @@ namespace Mayuns.DSB
         [HideInInspector] public bool isEdge = false;
         [HideInInspector] public bool isProxy = false;
         [HideInInspector] public float accumulatedDamage = 0;
+        [Header("Destruction Events")]
+        public UnityEvent onDestroyed;
         public enum TriangularCornerDesignation
         {
             None,
@@ -54,6 +57,8 @@ namespace Mayuns.DSB
         private void HandleDestruction()
         {
             isDestroyed = true;
+
+            onDestroyed?.Invoke();
 
             if (manager != null)
             {

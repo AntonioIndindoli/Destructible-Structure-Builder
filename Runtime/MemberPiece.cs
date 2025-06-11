@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Mayuns.DSB
 {
@@ -7,6 +8,8 @@ namespace Mayuns.DSB
         [HideInInspector] public bool isDestroyed = false;
         [HideInInspector] public StructuralMember member;
         public float accumulatedDamage = 0;
+        [Header("Destruction Events")]
+        public UnityEvent onDestroyed;
 
         public void DestroyMemberPiece()
         {
@@ -27,6 +30,8 @@ namespace Mayuns.DSB
             if (accumulatedDamage >= member.memberPieceHealth)
             {
                 isDestroyed = true;
+
+                onDestroyed?.Invoke();
 
                 if (member != null)
                 {
