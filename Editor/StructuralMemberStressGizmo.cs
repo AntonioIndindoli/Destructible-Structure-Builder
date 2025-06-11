@@ -24,14 +24,14 @@ namespace Mayuns.DSB.Editor
                     mgr.CalculateLoadsForEditor();
             }
 
-            /*────────── Colour calculation (same as before) ──────────*/
+            // Determine highlight colour based on current load ratio
             float stress =
                 Mathf.Clamp01(member.accumulatedLoad / Mathf.Max(0.0001f, member.supportCapacity));
 
             Color wire = Color.Lerp(Color.green, Color.red, stress);
             Color fill = new Color(wire.r, wire.g, wire.b, 0.25f);
 
-            /*────────── Draw the relevant colliders ──────────*/
+            // Draw the colliders that represent this member
             bool any = DrawCollider(member.combinedObject ? member.combinedObject.GetComponent<Collider>() : null, wire, fill);
 
             if (!member.isSplit && any) return;   // combined object done

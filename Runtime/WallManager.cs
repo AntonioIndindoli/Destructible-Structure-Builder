@@ -188,8 +188,9 @@ namespace Mayuns.DSB
 			}
 		}
 
-		public void SelfDestructCheck()
-		{
+                // Destroy the wall object when only a single piece remains
+                public void SelfDestructCheck()
+                {
 			int count = 0;
 			foreach (var p in wallGrid)
 			{
