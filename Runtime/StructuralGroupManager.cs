@@ -643,15 +643,15 @@ namespace Mayuns.DSB
         /// </summary>
         public void CalculateLoadsForEditor()
         {
-            if (structuralMembersHash == null || structuralMembersHash.Count == 0)
+            if (structuralMembers == null || structuralMembers.Count == 0)
                 return;
 
             UpdateCurrentMinDistancesToGround(true);
 
-            foreach (var member in structuralMembersHash)
+            foreach (var member in structuralMembers)
                 member.accumulatedLoad = member.mass;
 
-            var membersSorted = structuralMembersHash
+            var membersSorted = structuralMembers
                 .Where(m => !m.isDestroyed &&
                             !m.isNewSplitMember &&
                             m.currentMinDistanceToGround < int.MaxValue)
@@ -682,7 +682,7 @@ namespace Mayuns.DSB
 
             float ratio = newMass / pieceMass;
 
-            foreach (var member in structuralMembersHash)
+            foreach (var member in structuralMembers)
             {
                 if (member == null) continue;
                 Undo.RecordObject(member, "Change Member Mass");
@@ -690,7 +690,7 @@ namespace Mayuns.DSB
                 EditorUtility.SetDirty(member);
             }
 
-            foreach (var wall in wallsHash)
+            foreach (var wall in walls)
             {
                 if (wall == null) continue;
                 Undo.RecordObject(wall, "Change Wall Piece Mass");
