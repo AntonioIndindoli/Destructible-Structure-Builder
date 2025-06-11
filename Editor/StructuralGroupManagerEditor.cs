@@ -9,6 +9,7 @@ namespace Mayuns.DSB.Editor
         public override void OnInspectorGUI()
         {
             StructuralGroupManager manager = (StructuralGroupManager)target;
+            serializedObject.Update();
 
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("Structural Group Overview", EditorStyles.boldLabel);
@@ -35,6 +36,17 @@ namespace Mayuns.DSB.Editor
                 manager.ApplyPieceMass(newMass);
             }
 
+            EditorGUI.BeginChangeCheck();
+            SerializedProperty effectsProp = serializedObject.FindProperty("effects");
+            EditorGUILayout.PropertyField(effectsProp, new GUIContent("Sound Settings"), true);
+            if (EditorGUI.EndChangeCheck())
+            {
+                Undo.RecordObject(manager, "Modify Sound Settings");
+                serializedObject.ApplyModifiedProperties();
+                EditorUtility.SetDirty(manager);
+            }
+
+
             EditorGUILayout.Space();
 
             // Total active pieces (child objects)
@@ -54,6 +66,8 @@ namespace Mayuns.DSB.Editor
                 manager.RebuildVoxels();
                 EditorUtility.SetDirty(manager);
             }
+
+            serializedObject.ApplyModifiedProperties();
         }
     }
 }
