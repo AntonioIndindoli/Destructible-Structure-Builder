@@ -30,10 +30,31 @@ namespace Mayuns.DSB.Editor
             }
 
             EditorGUI.BeginChangeCheck();
-            float newMass = EditorGUILayout.FloatField("Piece Mass", manager.pieceMass);
+            float newMemberMass = EditorGUILayout.FloatField("Member Piece Mass", manager.memberPieceMass);
             if (EditorGUI.EndChangeCheck())
             {
-                manager.ApplyPieceMass(newMass);
+                manager.ApplyMemberPieceMass(newMemberMass);
+            }
+
+            EditorGUI.BeginChangeCheck();
+            float newMemberHealth = EditorGUILayout.FloatField("Member Piece Health", manager.memberPieceHealth);
+            if (EditorGUI.EndChangeCheck())
+            {
+                manager.ApplyMemberPieceHealth(newMemberHealth);
+            }
+
+            EditorGUI.BeginChangeCheck();
+            float newWallMass = EditorGUILayout.FloatField("Wall Piece Mass", manager.wallPieceMass);
+            if (EditorGUI.EndChangeCheck())
+            {
+                manager.ApplyWallPieceMass(newWallMass);
+            }
+
+            EditorGUI.BeginChangeCheck();
+            float newWallHealth = EditorGUILayout.FloatField("Wall Piece Health", manager.wallPieceHealth);
+            if (EditorGUI.EndChangeCheck())
+            {
+                manager.ApplyWallPieceHealth(newWallHealth);
             }
 
             EditorGUI.BeginChangeCheck();

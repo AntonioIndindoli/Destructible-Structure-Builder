@@ -315,6 +315,10 @@ namespace Mayuns.DSB.Editor
                 structuralGroup.minPropagationTime = buildSettings.minPropagationTime;
                 structuralGroup.maxPropagationTime = buildSettings.maxPropagationTime;
                 structuralGroup.buildSettings = buildSettings;
+                structuralGroup.memberPieceMass = buildSettings.memberMass;
+                structuralGroup.memberPieceHealth = buildSettings.memberPieceHealth;
+                structuralGroup.wallPieceMass = buildSettings.wallPieceMass;
+                structuralGroup.wallPieceHealth = buildSettings.wallPieceHealth;
                 structuralGroup.audioSource = structuralGroup.GetComponent<AudioSource>();
                 if (structuralGroup.audioSource == null)
                 {
@@ -809,8 +813,16 @@ namespace Mayuns.DSB.Editor
             wall.numColumns = design.columns;
             wall.numRows = design.rows;
             wall.wallGrid = new List<WallPiece>(new WallPiece[wall.numColumns * wall.numRows]);
-            wall.WallPieceMass = buildSettings.wallPieceMass;
-            wall.wallPieceHealth = buildSettings.wallPieceHealth;
+            if (wall.structuralGroup != null)
+            {
+                wall.WallPieceMass = wall.structuralGroup.wallPieceMass;
+                wall.wallPieceHealth = wall.structuralGroup.wallPieceHealth;
+            }
+            else
+            {
+                wall.WallPieceMass = buildSettings.wallPieceMass;
+                wall.wallPieceHealth = buildSettings.wallPieceHealth;
+            }
             wall.wallPieceWindowHealth = buildSettings.wallPieceWindowHealth;
             wall.textureScaleX = buildSettings.wallTextureScaleX;
             wall.textureScaleY = buildSettings.wallTextureScaleY;
@@ -1163,8 +1175,8 @@ namespace Mayuns.DSB.Editor
                         buildSettings.connectionMaterial,
                         buildSettings.memberLength,
                         buildSettings.memberThickness,
-                        buildSettings.memberMass,
-                        buildSettings.memberPieceHealth,
+                        connection.structuralGroup != null ? connection.structuralGroup.memberPieceMass : buildSettings.memberMass,
+                        connection.structuralGroup != null ? connection.structuralGroup.memberPieceHealth : buildSettings.memberPieceHealth,
                         buildSettings.memberSupportCapacity,
                         buildSettings.connectionSize
                         );
@@ -1472,8 +1484,8 @@ namespace Mayuns.DSB.Editor
             // Add the WallManager script to the wall for functionality
             WallManager spawnedWall = Undo.AddComponent<WallManager>(wall);
 
-            spawnedWall.WallPieceMass = buildSettings.wallPieceMass;
-            spawnedWall.wallPieceHealth = buildSettings.wallPieceHealth;
+            spawnedWall.WallPieceMass = structuralGroup != null ? structuralGroup.wallPieceMass : buildSettings.wallPieceMass;
+            spawnedWall.wallPieceHealth = structuralGroup != null ? structuralGroup.wallPieceHealth : buildSettings.wallPieceHealth;
             spawnedWall.wallPieceWindowHealth = buildSettings.wallPieceWindowHealth;
             spawnedWall.textureScaleX = buildSettings.wallTextureScaleX;
             spawnedWall.textureScaleY = buildSettings.wallTextureScaleY;
