@@ -950,7 +950,9 @@ new Vector2(textureScaleX, textureScaleY),
 
 			if (isWindow || mesh.bounds.size.z < 0.01f)
 			{
-				BoxCollider boxCollider = Undo.AddComponent<BoxCollider>(wallComponent.gameObject);
+				BoxCollider windowCollider = Undo.AddComponent<BoxCollider>(wallComponent.gameObject);
+				Vector3 original = windowCollider.size;
+				windowCollider.size = new Vector3(original.x, original.y, 1);
 			}
 			else
 			{

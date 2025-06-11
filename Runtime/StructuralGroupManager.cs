@@ -427,8 +427,29 @@ namespace Mayuns.DSB
             var structuralGroup = groupGO.AddComponent<StructuralGroupManager>();
             structuralGroup.isDetached = true;
 
+            // Copy runtime data so the new group behaves like the source
+            structuralGroup.strengthModifier = strengthModifier;
+            structuralGroup.minPropagationTime = minPropagationTime;
+            structuralGroup.maxPropagationTime = maxPropagationTime;
+            structuralGroup.memberPieceMass = memberPieceMass;
+            structuralGroup.memberPieceHealth = memberPieceHealth;
+            structuralGroup.wallPieceMass = wallPieceMass;
+            structuralGroup.wallPieceHealth = wallPieceHealth;
+            structuralGroup.collisionCooldown = collisionCooldown;
+            structuralGroup.buildSettings = buildSettings;
+            structuralGroup.validationInterval = validationInterval;
+
+            structuralGroup.effects = effects;
+            structuralGroup.audioSource = groupGO.GetComponent<AudioSource>();
+            if (structuralGroup.audioSource == null)
+                structuralGroup.audioSource = groupGO.AddComponent<AudioSource>();
+            structuralGroup.EnsureDefaultEffects();
+
             if (gibManager != null)
+            {
                 structuralGroup.gibManager = gibManager;
+                structuralGroup.hasGibManager = hasGibManager;
+            }
 
             if (structuralGroup.structuralMembersHash == null)
                 structuralGroup.structuralMembersHash = new HashSet<StructuralMember>();
@@ -771,7 +792,7 @@ namespace Mayuns.DSB
                 "Crumble_Default1",
                 "Crumble_Default2",
                 "Crumble_Default3",
-                "Crumble_Default4"
+                "Crumble_Default4",
             });
 
             AddIfMissing(EffectType.WallDestroyed, new[]
