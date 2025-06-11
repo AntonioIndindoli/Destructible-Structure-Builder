@@ -2,6 +2,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using System.Collections;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Mayuns.DSB
 {
@@ -10,6 +13,7 @@ namespace Mayuns.DSB
         public int strengthModifier;
         public float minPropagationTime = 0f;
         public float maxPropagationTime = 3f;
+        public float pieceMass = 10f;
         [HideInInspector] public StructureBuildSettings buildSettings;
         [HideInInspector] public bool isDetached = false;
         [HideInInspector] public List<StructuralMember> structuralMembers = new List<StructuralMember>();
@@ -670,6 +674,35 @@ namespace Mayuns.DSB
                     lower.accumulatedLoad += sharedLoad;
             }
         }
+
+        public void ApplyPieceMass(float newMass)
+        {
+            if (Mathf.Approximately(pieceMass, 0f))
+                pieceMass = 1f;
+
+            float ratio = newMass / pieceMass;
+
+            foreach (var member in structuralMembersHash)
+            {
+                if (member == null) continue;
+                Undo.RecordObject(member, "Change Member Mass");
+                member.mass *= ratio;
+                EditorUtility.SetDirty(member);
+            }
+
+            foreach (var wall in wallsHash)
+            {
+                if (wall == null) continue;
+                Undo.RecordObject(wall, "Change Wall Piece Mass");
+                wall.WallPieceMass *= ratio;
+                EditorUtility.SetDirty(wall);
+            }
+
+            Undo.RecordObject(this, "Change Piece Mass");
+            pieceMass = newMass;
+            EditorUtility.SetDirty(this);
+        }
+
         public void RebuildVoxels()
         {
             // Rebuild all walls

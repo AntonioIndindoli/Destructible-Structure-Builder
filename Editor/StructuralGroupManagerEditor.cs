@@ -28,6 +28,13 @@ namespace Mayuns.DSB.Editor
                 EditorUtility.SetDirty(manager);
             }
 
+            EditorGUI.BeginChangeCheck();
+            float newMass = EditorGUILayout.FloatField("Piece Mass", manager.pieceMass);
+            if (EditorGUI.EndChangeCheck())
+            {
+                manager.ApplyPieceMass(newMass);
+            }
+
             EditorGUILayout.Space();
 
             // Total active pieces (child objects)

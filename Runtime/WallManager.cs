@@ -513,7 +513,7 @@ namespace Mayuns.DSB
 				pieceTransform.rotation = worldRot;
 				pieceTransform.localScale = worldScale;
 
-				rb.mass += WallPieceMass;
+				rb.mass += WallPieceMass * pieces.Count;
 
 				Vector2Int pos = wallPiece.gridPosition;
 				if (pos.x >= 0 && pos.x < numColumns && pos.y >= 0 && pos.y < numRows)
