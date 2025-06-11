@@ -247,30 +247,35 @@ namespace Mayuns.DSB
 			for (int i = 0; i < pieceCount; i++)
 			{
 				GameObject go = chunk.wallPieces[i];
-				if (go)
-				{
-					go.SetActive(true);
-					go.hideFlags = HideFlags.None;
-					var wp = go.GetComponent<WallPiece>();
-					if (wp)
-					{
-						var pos = wp.gridPosition;
-						int idx = pos.x + pos.y * numColumns;
-						wallGrid[idx] = wp;
+                                if (go)
+                                {
+                                        go.SetActive(true);
+                                        go.hideFlags = HideFlags.None;
+                                        var wp = go.GetComponent<WallPiece>();
+                                        if (wp)
+                                        {
+                                                var pos = wp.gridPosition;
+                                                int idx = pos.x + pos.y * numColumns;
+                                                wallGrid[idx] = wp;
 
-						wp.TakeDamage(damagePerPiece);
-					}
-				}
+                                                // Reset proxy/chunk flags so voxels behave normally
+                                                wp.isProxy = false;
+                                                wp.chunk = null;
+
+                                                wp.TakeDamage(damagePerPiece);
+                                        }
+                                }
 
 				// Yield every few pieces or each piece to spread the load
 				if (i % 2 == 0) // Adjust this batch size as needed
 					yield return null;
 			}
 
-			Destroy(chunk.gameObject);
-			isRebuildingGrid = false;
-			ValidateWallIntegrity();
-		}
+                        Destroy(chunk.gameObject);
+                        _chunks.Remove(chunk);
+                        isRebuildingGrid = false;
+                        ValidateWallIntegrity();
+                }
 
 		public void InstantUncombine()
 		{
