@@ -836,30 +836,30 @@ namespace Mayuns.DSB
 																					   Random.Range(-variationAmount * 2, variationAmount * 2), 0);
 					}
 
-                        /*–––– main grid loop –––––*/
-                        for (int gy = 0; gy < numRows; ++gy)
-                                for (int gx = 0; gx < numColumns; ++gx)
-                                {
-                                        int idx = gx + gy * numColumns;
-                                        WallPiece old = wallGrid[idx];
-                                        if (old == null)
-                                        {
-                                                // Ensure the grid slot remains empty when rebuilding
-                                                wallGrid[idx] = null;
-                                                continue;
-                                        }
+			/*–––– main grid loop –––––*/
+			for (int gy = 0; gy < numRows; ++gy)
+				for (int gx = 0; gx < numColumns; ++gx)
+				{
+					bool cellExists = wallGrid[gx + gy * numColumns] != null;
 
-                                        Vector3 localPos = new(
-                                                (gx * cubeSize.x - worldWallSize.x * .5f + cubeSize.x * .5f) / scale.x,
-                                                (gy * cubeSize.y - worldWallSize.y * .5f + cubeSize.y * .5f) / scale.y,
-                                                (-worldWallSize.z * .5f + cubeSize.z * .5f) / scale.z);
+					int idx = gx + gy * numColumns;
 
-                                        Vector3 worldPos = transform.TransformPoint(localPos);
+					Vector3 localPos = new(
+						(gx * cubeSize.x - worldWallSize.x * .5f + cubeSize.x * .5f) / scale.x,
+						(gy * cubeSize.y - worldWallSize.y * .5f + cubeSize.y * .5f) / scale.y,
+						(-worldWallSize.z * .5f + cubeSize.z * .5f) / scale.z);
 
-                                        /*–‑ gather old info (window / triangle) –‑*/
-                                        bool isWindow = old.isWindow;
-                                        bool isTri = old.cornerDesignation != WallPiece.TriangularCornerDesignation.None;
-                                        if (old) Undo.DestroyObjectImmediate(old.gameObject);
+					Vector3 worldPos = transform.TransformPoint(localPos);
+
+					/*–‑ gather old info (window / triangle) –‑*/
+					WallPiece old = cellExists ? wallGrid[idx] : null;
+					bool isWindow = old?.isWindow ?? false;
+					bool isTri = old && old.cornerDesignation != WallPiece.TriangularCornerDesignation.None;
+					if (old) Undo.DestroyObjectImmediate(old.gameObject);
+					else if (rebuilding)
+					{
+						continue;
+					}
 
 					/*–‑ see if mesh is already cached –‑*/
 					Mesh cachedMesh = null;
@@ -879,36 +879,36 @@ namespace Mayuns.DSB
 						Undo.RegisterCreatedObjectUndo(voxelGO, "Create Cached Voxel");
 						voxelComp = Undo.AddComponent<WallPiece>(voxelGO);
 						voxelComp.isWindow = isWindow;
-                                                voxelComp.cornerDesignation = isTri ? old.cornerDesignation : 0;
+						voxelComp.cornerDesignation = isTri ? old.cornerDesignation : 0;
 					}
 					else              /*───────── SLOW / PROC PATH ──*/
 					{
 
 						if (isTri)
 							voxelGO = VoxelBuildingUtility.CreateTriangle(
-cubeSize, worldPos, gx, gy, 0,
-defaultMat, cubeSize, old.cornerDesignation,
-worldWallSize, numRows, numColumns,
-new Vector2(textureScaleX, textureScaleY),
-"WallTriangleVoxel");
+										cubeSize, worldPos, gx, gy, 0,
+										defaultMat, cubeSize, old.cornerDesignation,
+										worldWallSize, numRows, numColumns,
+										new Vector2(textureScaleX, textureScaleY),
+										"WallTriangleVoxel");
 						else if (isWindow)
 							voxelGO = VoxelBuildingUtility.CreateWindow(
-cubeSize, worldPos, gx, gy, glassMaterial,
-cubeSize, vertexOffsets, worldWallSize,
-numRows, numColumns, new Vector2(textureScaleX, textureScaleY), "WallWindowVoxel");
+										cubeSize, worldPos, gx, gy, glassMaterial,
+										cubeSize, vertexOffsets, worldWallSize,
+										numRows, numColumns, new Vector2(textureScaleX, textureScaleY), "WallWindowVoxel");
 						else
 							voxelGO = VoxelBuildingUtility.CreateIrregularCube(
-cubeSize, worldPos, gx, gy, 0,
-defaultMat, cubeSize, vertexOffsets,
-worldWallSize, numRows, numColumns,
-new Vector2(textureScaleX, textureScaleY),
-1, "WallVoxel");
+										cubeSize, worldPos, gx, gy, 0,
+										defaultMat, cubeSize, vertexOffsets,
+										worldWallSize, numRows, numColumns,
+										new Vector2(textureScaleX, textureScaleY),
+										1, "WallVoxel");
 
 
 						Undo.RegisterCreatedObjectUndo(voxelGO, "Create Wall Voxel");
 						voxelComp = Undo.AddComponent<WallPiece>(voxelGO);
 						voxelComp.isWindow = isWindow;
-                                                voxelComp.cornerDesignation = isTri ? old.cornerDesignation : 0;
+						voxelComp.cornerDesignation = isTri ? old.cornerDesignation : 0;
 
 						MeshFilter mf = voxelGO.GetComponent<MeshFilter>();
 						if (mf && mf.sharedMesh)
