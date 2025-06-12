@@ -11,12 +11,12 @@ namespace Mayuns.DSB
 {
 	public class WallManager : MonoBehaviour
 	{
-		[HideInInspector] public float wallPieceHealth = 100f;
+		[HideInInspector] public float voxelHealth = 100f;
 		[HideInInspector] public HashSet<StructuralMember> edgeMembers = new HashSet<StructuralMember>();
 		[HideInInspector] public int numRows = 8;
 		[HideInInspector] public int numColumns = 8;
 		[HideInInspector] public List<Chunk> _chunks = new List<Chunk>();         // all created chunks
-		[HideInInspector] public float WallPieceMass = 50.0f;
+		[HideInInspector] public float voxelMass = 50.0f;
 		[HideInInspector] public bool isGrouped = false;
 		[HideInInspector] public List<WallPiece> wallGrid;
 		[HideInInspector] public StructuralGroupManager structuralGroup;
@@ -126,7 +126,7 @@ namespace Mayuns.DSB
 					rb = combinedGO.AddComponent<Rigidbody>();
 				}
 
-				rb.mass = WallPieceMass * chunk.wallPieces.Count;
+				rb.mass = voxelMass * chunk.wallPieces.Count;
 				rb.interpolation = RigidbodyInterpolation.None;
 				rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
 
@@ -519,7 +519,7 @@ namespace Mayuns.DSB
 				pieceTransform.rotation = worldRot;
 				pieceTransform.localScale = worldScale;
 
-				rb.mass += WallPieceMass * pieces.Count;
+				rb.mass += voxelMass * pieces.Count;
 
 				Vector2Int pos = wallPiece.gridPosition;
 				if (pos.x >= 0 && pos.x < numColumns && pos.y >= 0 && pos.y < numRows)

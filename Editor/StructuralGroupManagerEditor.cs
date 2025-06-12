@@ -30,31 +30,31 @@ namespace Mayuns.DSB.Editor
             }
 
             EditorGUI.BeginChangeCheck();
-            float newMemberMass = EditorGUILayout.FloatField("Member Piece Mass", manager.memberPieceMass);
+            float newMemberMass = EditorGUILayout.FloatField("Member Piece Mass", manager.voxelMass);
             if (EditorGUI.EndChangeCheck())
             {
-                manager.ApplyMemberPieceMass(newMemberMass);
+                manager.ApplyvoxelMass(newMemberMass);
             }
 
             EditorGUI.BeginChangeCheck();
-            float newMemberHealth = EditorGUILayout.FloatField("Member Piece Health", manager.memberPieceHealth);
+            float newMemberHealth = EditorGUILayout.FloatField("Member Piece Health", manager.voxelHealth);
             if (EditorGUI.EndChangeCheck())
             {
-                manager.ApplyMemberPieceHealth(newMemberHealth);
+                manager.ApplyvoxelHealth(newMemberHealth);
             }
 
             EditorGUI.BeginChangeCheck();
-            float newWallMass = EditorGUILayout.FloatField("Wall Piece Mass", manager.wallPieceMass);
+            float newWallMass = EditorGUILayout.FloatField("Wall Piece Mass", manager.voxelMass);
             if (EditorGUI.EndChangeCheck())
             {
-                manager.ApplyWallPieceMass(newWallMass);
+                manager.ApplyvoxelMass(newWallMass);
             }
 
             EditorGUI.BeginChangeCheck();
-            float newWallHealth = EditorGUILayout.FloatField("Wall Piece Health", manager.wallPieceHealth);
+            float newWallHealth = EditorGUILayout.FloatField("Wall Piece Health", manager.voxelHealth);
             if (EditorGUI.EndChangeCheck())
             {
-                manager.ApplyWallPieceHealth(newWallHealth);
+                manager.ApplyvoxelHealth(newWallHealth);
             }
 
             EditorGUI.BeginChangeCheck();

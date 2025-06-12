@@ -599,10 +599,6 @@ namespace Mayuns.DSB.Editor
             buildSettings.memberSupportCapacity = EditorGUILayout.FloatField("Member Support Capacity", buildSettings.memberSupportCapacity);
             buildSettings.memberMaterial = (Material)EditorGUILayout.ObjectField("Member Material", buildSettings.memberMaterial, typeof(Material), false);
             buildSettings.disableDirection = (DisableDirection)EditorGUILayout.EnumPopup("Disable Direction", buildSettings.disableDirection);
-            EditorGUILayout.Space(10);
-            GUILayout.Label("Connection Node Settings", EditorStyles.boldLabel);
-            buildSettings.connectionSize = EditorGUILayout.FloatField("Connection Size", buildSettings.connectionSize);
-            buildSettings.connectionMaterial = (Material)EditorGUILayout.ObjectField("Connection Material", buildSettings.connectionMaterial, typeof(Material), false);
         }
 
         private void DrawWallSettings()
@@ -633,17 +629,16 @@ namespace Mayuns.DSB.Editor
             float originalLabelWidth = EditorGUIUtility.labelWidth;
             EditorGUIUtility.labelWidth = 200f;
 
-            GUILayout.Label("Initial Connection Node Material", EditorStyles.boldLabel);
-            buildSettings.connectionMaterial = (Material)EditorGUILayout.ObjectField("Connection Material", buildSettings.connectionMaterial, typeof(Material), false);
+            GUILayout.Label("Member Material", EditorStyles.boldLabel);
+            buildSettings.memberMaterial = (Material)EditorGUILayout.ObjectField("Member Material", buildSettings.memberMaterial, typeof(Material), false);
+            buildSettings.memberThickness = EditorGUILayout.FloatField("Member Thickness", buildSettings.memberThickness);
             EditorGUILayout.Space(10);
             GUILayout.Label("Structural Strength", EditorStyles.boldLabel);
             buildSettings.strengthModifier = EditorGUILayout.IntField("Member Support Capacity Modifier", buildSettings.strengthModifier);
             EditorGUILayout.Space(10);
-            GUILayout.Label("Initial Piece Settings", EditorStyles.boldLabel);
-            buildSettings.memberMass = EditorGUILayout.FloatField("Member Piece Mass", buildSettings.memberMass);
-            buildSettings.memberPieceHealth = EditorGUILayout.FloatField("Member Piece Health", buildSettings.memberPieceHealth);
-            buildSettings.wallPieceMass = EditorGUILayout.FloatField("Wall Piece Mass", buildSettings.wallPieceMass);
-            buildSettings.wallPieceHealth = EditorGUILayout.FloatField("Wall Piece Health", buildSettings.wallPieceHealth);
+            GUILayout.Label("Voxel Settings", EditorStyles.boldLabel);
+            buildSettings.voxelMass = EditorGUILayout.FloatField("Voxel Piece Mass", buildSettings.voxelMass);
+            buildSettings.voxelHealth = EditorGUILayout.FloatField("Voxel Piece Health", buildSettings.voxelHealth);
             EditorGUILayout.Space(10);
             EditorGUILayout.LabelField("Stress Damage Propagation Timing", EditorStyles.boldLabel);
 

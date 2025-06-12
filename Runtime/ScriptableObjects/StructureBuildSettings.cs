@@ -12,19 +12,15 @@ namespace Mayuns.DSB
     public class StructureBuildSettings : ScriptableObject
     {
         public float memberLength = 5f;
-        public float memberThickness = 0.25f;
-        public float memberMass = 10f;
-        public float memberPieceHealth = 100f;
-        public float memberTextureScaleX = 1f;
-        public float memberTextureScaleY = 1f;
-        public float memberSupportCapacity = 100f;
+        public float memberThickness = 0.5f;
+        public float memberTextureScaleX = .33f;
+        public float memberTextureScaleY = .33f;
+        public float memberSupportCapacity = 500f;
         public Material memberMaterial;
         public DisableDirection disableDirection;
         public int strengthModifier = 100;
         public float minPropagationTime = 1f;
-        public float maxPropagationTime = 5f;
-        public float connectionSize = 0.25f;
-        public Material connectionMaterial;
+        public float maxPropagationTime = 10f;
         public Material wallMaterial;
         public Material glassMaterial;
         public WallDesign defaultWallDesign;
@@ -36,9 +32,9 @@ namespace Mayuns.DSB
         public float wallThickness = .2f;
         public int wallColumnCellCount = 5;
         public int wallRowCellCount = 5;
-        public float wallPieceMass = 50f;
-        public float wallPieceHealth = 100f;
         public float wallTextureScaleX = 1f;
         public float wallTextureScaleY = 1f;
+        public float voxelMass = 100f;
+        public float voxelHealth = 100f;
     }
 }

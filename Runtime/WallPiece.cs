@@ -42,7 +42,7 @@ namespace Mayuns.DSB
         /// </summary>
         public void DestroyWallPiece()
         {
-            TakeDamage(manager.wallPieceHealth);
+            TakeDamage(manager.voxelHealth);
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace Mayuns.DSB
 
             accumulatedDamage += damage;
 
-            if (accumulatedDamage >= manager.wallPieceHealth)
+            if (accumulatedDamage >= manager.voxelHealth)
             {
                 HandleDestruction();
             }

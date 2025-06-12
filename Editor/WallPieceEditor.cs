@@ -18,7 +18,7 @@ namespace Mayuns.DSB
 
             if (piece.manager != null)
             {
-                EditorGUILayout.FloatField("Wall Piece Health", piece.manager.wallPieceHealth);
+                EditorGUILayout.FloatField("Wall Piece Health", piece.manager.voxelHealth);
             }
             else
             {

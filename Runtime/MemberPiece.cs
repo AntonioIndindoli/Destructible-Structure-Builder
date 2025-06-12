@@ -19,7 +19,7 @@ namespace Mayuns.DSB
         /// </summary>
         public void DestroyMemberPiece()
         {
-            TakeDamage(member.memberPieceHealth);
+            TakeDamage(member.voxelHealth);
         }
 
         void Start()
@@ -38,7 +38,7 @@ namespace Mayuns.DSB
 
             accumulatedDamage += damage;
 
-            if (accumulatedDamage >= member.memberPieceHealth)
+            if (accumulatedDamage >= member.voxelHealth)
             {
                 isDestroyed = true;
 

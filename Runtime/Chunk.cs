@@ -41,7 +41,7 @@ namespace Mayuns.DSB
 				{
 					wallManager.UncombineChunk(this, accumulatedDamage);
 				}
-				else if (accumulatedDamage >= wallManager.wallPieceHealth)
+				else if (accumulatedDamage >= wallManager.voxelHealth)
 				{
 					if (this == null || IsBroken) return;
 
@@ -52,7 +52,7 @@ namespace Mayuns.DSB
 			}
 			else if (structuralMember != null && damage > 0)
 			{
-				if (accumulatedDamage > structuralMember.memberPieceHealth)
+				if (accumulatedDamage > structuralMember.voxelHealth)
 				{
 					structuralMember.DestroyRandomMemberPiece();
 				}

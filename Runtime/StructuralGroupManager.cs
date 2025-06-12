@@ -13,10 +13,9 @@ namespace Mayuns.DSB
         public int strengthModifier;
         public float minPropagationTime = 0f;
         public float maxPropagationTime = 3f;
-        public float memberPieceMass = 10f;
-        public float memberPieceHealth = 100f;
-        public float wallPieceMass = 50f;
-        public float wallPieceHealth = 100f;
+        public float voxelMass = 10f;
+        public float voxelHealth = 100f;
+
         [System.Serializable]
         public class EffectInfo
         {
@@ -58,8 +57,8 @@ namespace Mayuns.DSB
         private float validationCooldown = 0f;
         private float cleanupTimer = 0f;
         private const float cleanupInterval = 5f;
-        
-        void Awake()   
+
+        void Awake()
         {
             foreach (EffectType t in System.Enum.GetValues(typeof(EffectType)))
                 _nextPlayTime[t] = 0f;
@@ -440,10 +439,10 @@ namespace Mayuns.DSB
             structuralGroup.strengthModifier = strengthModifier;
             structuralGroup.minPropagationTime = minPropagationTime;
             structuralGroup.maxPropagationTime = maxPropagationTime;
-            structuralGroup.memberPieceMass = memberPieceMass;
-            structuralGroup.memberPieceHealth = memberPieceHealth;
-            structuralGroup.wallPieceMass = wallPieceMass;
-            structuralGroup.wallPieceHealth = wallPieceHealth;
+            structuralGroup.voxelMass = voxelMass;
+            structuralGroup.voxelHealth = voxelHealth;
+            structuralGroup.voxelMass = voxelMass;
+            structuralGroup.voxelHealth = voxelHealth;
             structuralGroup.collisionCooldown = collisionCooldown;
             structuralGroup.buildSettings = buildSettings;
             structuralGroup.validationInterval = validationInterval;
@@ -694,7 +693,7 @@ namespace Mayuns.DSB
 
         private void PlayEffects(EffectType type, Vector3 position)
         {
-            PlayEffects(type, position, 1f);
+            PlayEffects(type, position, .5f);
         }
 
         private void PlayEffects(EffectType type, Vector3 position, float volumeScale)
@@ -744,8 +743,28 @@ namespace Mayuns.DSB
                         clips.Add(clip);
                 }
                 info.clips = clips.ToArray();
-                info.volume = 1f;
                 info.particlePrefabs = null;
+
+                if (type == EffectType.Crumble)
+                {
+                    info.volume = .2f;
+                    info.cooldown = .5f;
+                }
+                if (type == EffectType.LargeCollapse)
+                {
+                    info.volume = .5f;
+                    info.cooldown = 5f;
+                }
+                if (type == EffectType.MemberStress)
+                {
+                    info.volume = .2f;
+                    info.cooldown = 3f;
+                }
+                if (type == EffectType.WindowShatter)
+                {
+                    info.volume = .2f;
+                    info.cooldown = .5f;
+                }
                 effectList.Add(info);
             }
 
@@ -842,12 +861,12 @@ namespace Mayuns.DSB
             }
         }
 
-        public void ApplyMemberPieceMass(float newMass)
+        public void ApplyvoxelMass(float newMass)
         {
-            if (Mathf.Approximately(memberPieceMass, 0f))
-                memberPieceMass = 1f;
+            if (Mathf.Approximately(voxelMass, 0f))
+                voxelMass = 1f;
 
-            float ratio = newMass / memberPieceMass;
+            float ratio = newMass / voxelMass;
 
             foreach (var member in structuralMembers)
             {
@@ -861,62 +880,35 @@ namespace Mayuns.DSB
             {
                 if (wall == null) continue;
                 Undo.RecordObject(wall, "Change Wall Piece Mass");
-                wall.WallPieceMass *= ratio;
+                wall.voxelMass *= ratio;
                 EditorUtility.SetDirty(wall);
             }
 
             Undo.RecordObject(this, "Change Member Piece Mass");
-            memberPieceMass = newMass;
+            voxelMass = newMass;
             EditorUtility.SetDirty(this);
         }
 
-        public void ApplyWallPieceMass(float newMass)
-        {
-            if (Mathf.Approximately(wallPieceMass, 0f))
-                wallPieceMass = 1f;
-
-            float ratio = newMass / wallPieceMass;
-
-            foreach (var wall in walls)
-            {
-                if (wall == null) continue;
-                Undo.RecordObject(wall, "Change Wall Piece Mass");
-                wall.WallPieceMass *= ratio;
-                EditorUtility.SetDirty(wall);
-            }
-
-            Undo.RecordObject(this, "Change Wall Piece Mass");
-            wallPieceMass = newMass;
-            EditorUtility.SetDirty(this);
-        }
-
-        public void ApplyMemberPieceHealth(float newHealth)
+        public void ApplyvoxelHealth(float newHealth)
         {
             foreach (var member in structuralMembers)
             {
                 if (member == null) continue;
                 Undo.RecordObject(member, "Change Member Piece Health");
-                member.memberPieceHealth = newHealth;
+                member.voxelHealth = newHealth;
                 EditorUtility.SetDirty(member);
             }
 
-            Undo.RecordObject(this, "Change Member Piece Health");
-            memberPieceHealth = newHealth;
-            EditorUtility.SetDirty(this);
-        }
-
-        public void ApplyWallPieceHealth(float newHealth)
-        {
             foreach (var wall in walls)
             {
                 if (wall == null) continue;
                 Undo.RecordObject(wall, "Change Wall Piece Health");
-                wall.wallPieceHealth = newHealth;
+                wall.voxelHealth = newHealth;
                 EditorUtility.SetDirty(wall);
             }
 
-            Undo.RecordObject(this, "Change Wall Piece Health");
-            wallPieceHealth = newHealth;
+            Undo.RecordObject(this, "Change Structure Piece Health");
+            voxelHealth = newHealth;
             EditorUtility.SetDirty(this);
         }
 

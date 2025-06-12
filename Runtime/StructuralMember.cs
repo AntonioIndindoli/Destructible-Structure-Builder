@@ -35,7 +35,7 @@ namespace Mayuns.DSB
 		public float mass = 10f;
 		public float supportCapacity = 100f;
 		public float accumulatedLoad = 0f;
-		public float memberPieceHealth = 100f;
+		public float voxelHealth = 100f;
 		[HideInInspector] public float textureScaleX = 1f;
 		[HideInInspector] public float textureScaleY = 1f;
 

@@ -302,23 +302,21 @@ namespace Mayuns.DSB.Editor
                 connectionGO.name = "StructuralConnection";
 
                 connectionGO.transform.position = spawnPosition;
-                connectionGO.transform.localScale = Vector3.one * buildSettings.connectionSize;
+                connectionGO.transform.localScale = Vector3.one * buildSettings.memberThickness;
                 connectionGO.transform.SetParent(newStructure.transform, true);
 
                 StructuralConnection connectionReference = connectionGO.AddComponent<StructuralConnection>();
 
-                if (buildSettings.connectionMaterial != null)
-                    connectionGO.GetComponent<MeshRenderer>().sharedMaterial = buildSettings.connectionMaterial;
+                if (buildSettings.memberMaterial != null)
+                    connectionGO.GetComponent<MeshRenderer>().sharedMaterial = buildSettings.memberMaterial;
 
                 structuralGroup.memberConnections.Add(connectionReference);
                 structuralGroup.strengthModifier = buildSettings.strengthModifier;
                 structuralGroup.minPropagationTime = buildSettings.minPropagationTime;
                 structuralGroup.maxPropagationTime = buildSettings.maxPropagationTime;
                 structuralGroup.buildSettings = buildSettings;
-                structuralGroup.memberPieceMass = buildSettings.memberMass;
-                structuralGroup.memberPieceHealth = buildSettings.memberPieceHealth;
-                structuralGroup.wallPieceMass = buildSettings.wallPieceMass;
-                structuralGroup.wallPieceHealth = buildSettings.wallPieceHealth;
+                structuralGroup.voxelHealth = buildSettings.voxelHealth;
+                structuralGroup.voxelMass = buildSettings.voxelMass;
                 structuralGroup.audioSource = structuralGroup.GetComponent<AudioSource>();
                 if (structuralGroup.audioSource == null)
                 {
@@ -815,13 +813,13 @@ namespace Mayuns.DSB.Editor
             wall.wallGrid = new List<WallPiece>(new WallPiece[wall.numColumns * wall.numRows]);
             if (wall.structuralGroup != null)
             {
-                wall.WallPieceMass = wall.structuralGroup.wallPieceMass;
-                wall.wallPieceHealth = wall.structuralGroup.wallPieceHealth;
+                wall.voxelMass = wall.structuralGroup.voxelMass;
+                wall.voxelHealth = wall.structuralGroup.voxelHealth;
             }
             else
             {
-                wall.WallPieceMass = buildSettings.wallPieceMass;
-                wall.wallPieceHealth = buildSettings.wallPieceHealth;
+                wall.voxelMass = buildSettings.voxelMass;
+                wall.voxelHealth = buildSettings.voxelHealth;
             }
 
             wall.textureScaleX = buildSettings.wallTextureScaleX;
@@ -1172,13 +1170,12 @@ namespace Mayuns.DSB.Editor
                         connection,
                         localDir,
                         buildSettings.memberMaterial,
-                        buildSettings.connectionMaterial,
                         buildSettings.memberLength,
                         buildSettings.memberThickness,
-                        connection.structuralGroup != null ? connection.structuralGroup.memberPieceMass : buildSettings.memberMass,
-                        connection.structuralGroup != null ? connection.structuralGroup.memberPieceHealth : buildSettings.memberPieceHealth,
+                        connection.structuralGroup != null ? connection.structuralGroup.voxelMass : buildSettings.voxelMass,
+                        connection.structuralGroup != null ? connection.structuralGroup.voxelHealth : buildSettings.voxelHealth,
                         buildSettings.memberSupportCapacity,
-                        buildSettings.connectionSize
+                        buildSettings.memberThickness
                         );
                     EditorUtility.SetDirty(connection);
                     UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(connection.gameObject.scene);
@@ -1192,11 +1189,10 @@ namespace Mayuns.DSB.Editor
                     StructuralConnection connection,
                     Vector3 directionWorldSpace,
                     Material selectedMemberMat,
-                    Material selectedConnectionMat,
                     float baseLength,
                     float thickness,
                     float memberMass,
-                    float memberPieceHealth,
+                    float voxelHealth,
                     float memberSupportCapacity,
                     float connectionThickness)
         {
@@ -1259,7 +1255,7 @@ namespace Mayuns.DSB.Editor
             newMem.thickness = thickness;
             newMem.length = baseLength;
             newMem.mass = memberMass;
-            newMem.memberPieceHealth = memberPieceHealth;
+            newMem.voxelHealth = voxelHealth;
             newMem.textureScaleX = buildSettings.memberTextureScaleX;
             newMem.textureScaleY = buildSettings.memberTextureScaleY;
             newMem.supportCapacity = memberSupportCapacity;
@@ -1285,8 +1281,8 @@ namespace Mayuns.DSB.Editor
                 connGO.transform.SetPositionAndRotation(endConnPos, connection.transform.rotation);
                 connGO.transform.localScale = Vector3.one * thickness * 1.01f; // Same as member thickness, but scaled up by 1% to prevent Z fighting
 
-                if (selectedConnectionMat)
-                    connGO.GetComponent<Renderer>().sharedMaterial = selectedConnectionMat;
+                if (selectedMemberMat)
+                    connGO.GetComponent<Renderer>().sharedMaterial = selectedMemberMat;
 
                 Undo.AddComponent<BoxCollider>(connGO);
                 endConn = Undo.AddComponent<StructuralConnection>(connGO);
@@ -1496,8 +1492,8 @@ namespace Mayuns.DSB.Editor
 
             if (structuralGroup)
             {
-                spawnedWall.WallPieceMass = structuralGroup != null ? structuralGroup.wallPieceMass : buildSettings.wallPieceMass;
-                spawnedWall.wallPieceHealth = structuralGroup != null ? structuralGroup.wallPieceHealth : buildSettings.wallPieceHealth;
+                spawnedWall.voxelMass = structuralGroup != null ? structuralGroup.voxelMass : buildSettings.voxelMass;
+                spawnedWall.voxelHealth = structuralGroup != null ? structuralGroup.voxelHealth : buildSettings.voxelHealth;
                 Undo.RecordObject(structuralGroup, "Add Wall to Structural Group");
                 structuralGroup.walls.Add(spawnedWall);
                 structuralGroup.walls.RemoveAll(walls => walls == null);

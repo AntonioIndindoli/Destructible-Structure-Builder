@@ -15,7 +15,7 @@ namespace Mayuns.DSB
 
             if (piece.member != null)
             {
-                EditorGUILayout.FloatField("Max Health (From Member)", piece.member.memberPieceHealth);
+                EditorGUILayout.FloatField("Max Health (From Member)", piece.member.voxelHealth);
             }
 
             EditorGUI.BeginChangeCheck();
