@@ -30,31 +30,17 @@ namespace Mayuns.DSB.Editor
             }
 
             EditorGUI.BeginChangeCheck();
-            float newMemberMass = EditorGUILayout.FloatField("Member Piece Mass", manager.voxelMass);
+            float newMemberMass = EditorGUILayout.FloatField("Voxel Mass", manager.voxelMass);
             if (EditorGUI.EndChangeCheck())
             {
                 manager.ApplyvoxelMass(newMemberMass);
             }
 
             EditorGUI.BeginChangeCheck();
-            float newMemberHealth = EditorGUILayout.FloatField("Member Piece Health", manager.voxelHealth);
+            float newMemberHealth = EditorGUILayout.FloatField("Voxel Health", manager.voxelHealth);
             if (EditorGUI.EndChangeCheck())
             {
                 manager.ApplyvoxelHealth(newMemberHealth);
-            }
-
-            EditorGUI.BeginChangeCheck();
-            float newWallMass = EditorGUILayout.FloatField("Wall Piece Mass", manager.voxelMass);
-            if (EditorGUI.EndChangeCheck())
-            {
-                manager.ApplyvoxelMass(newWallMass);
-            }
-
-            EditorGUI.BeginChangeCheck();
-            float newWallHealth = EditorGUILayout.FloatField("Wall Piece Health", manager.voxelHealth);
-            if (EditorGUI.EndChangeCheck())
-            {
-                manager.ApplyvoxelHealth(newWallHealth);
             }
 
             EditorGUI.BeginChangeCheck();

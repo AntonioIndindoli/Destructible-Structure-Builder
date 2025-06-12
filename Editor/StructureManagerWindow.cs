@@ -20,10 +20,11 @@ namespace Mayuns.DSB.Editor
         private string wallDesignName = "";
         const string kPrefsKey = "SB_WALL_DESIGN_FOLDER_GUID";
         private string _lastDesignPath;
-
+        Dictionary<StructureBuildTool.BuildMode, GUIContent> modeIcons;
         private void OnEnable()
         {
             instance = this;
+            LoadModeIcons();
             // First try to reuse the last asset the user picked this session
             if (buildSettings == null && SessionState.GetInt("SBS_GUID_SET", 0) == 1)
             {
@@ -76,6 +77,38 @@ namespace Mayuns.DSB.Editor
             instance = null;
         }
 
+        void LoadModeIcons()
+        {
+            modeIcons = new()
+                {
+                { StructureBuildTool.BuildMode.StructuralMemberBuild,
+                    MakeIcon("StructuralMemberBuild.png",  "Structural Member Build") },
+
+                { StructureBuildTool.BuildMode.CreateStructure,
+                    MakeIcon("CreateStructure.png",        "Create Structure") },
+
+                { StructureBuildTool.BuildMode.WallBuild,
+                    MakeIcon("WallBuild.png",              "Wall Build") },
+
+                { StructureBuildTool.BuildMode.WallEdit,
+                    MakeIcon("WallEdit.png",               "Wall Edit") },
+
+                { StructureBuildTool.BuildMode.ApplyDesign,
+                    MakeIcon("ApplyDesign.png",            "Apply Design") },
+
+                { StructureBuildTool.BuildMode.ApplyMaterial,
+                    MakeIcon("ApplyMaterial.png",          "Apply Material") },
+
+                { StructureBuildTool.BuildMode.Delete,
+                    MakeIcon("Delete.png",                 "Delete") },
+                };
+        }
+
+        GUIContent MakeIcon(string file, string tooltip)
+        {
+            var tex = EditorGUIUtility.Load($"Editor/Icons/{file}") as Texture2D;
+            return new GUIContent(tex, tooltip);
+        }
         string GetDesignFolderPathCached()
         {
             string guid = EditorPrefs.GetString(kPrefsKey, string.Empty);
@@ -160,19 +193,43 @@ namespace Mayuns.DSB.Editor
             EditorGUILayout.BeginHorizontal("box");
             var newBuildMode = (StructureBuildTool.BuildMode)EditorGUILayout.EnumPopup("Select Build Mode:", StructureBuildTool.currentMode);
 
-            // Add some spacing or alignment if needed here
-
             if (newBuildMode != StructureBuildTool.currentMode)
             {
                 StructureBuildTool.currentMode = newBuildMode;
                 StructureBuildTool.SetBuildMode(StructureBuildTool.currentMode);
             }
 
-            // Apply fixed width to the button using GUILayout.Width
-            if (GUILayout.Button("Disable Mode", GUILayout.Width(100)))
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.BeginHorizontal("box");
+
+            // Build an ordered list of GUIContent and an int index for Toolbar
+            var contents = new List<GUIContent>();
+            var modes = new List<StructureBuildTool.BuildMode>();
+
+            foreach (var kv in modeIcons)
+            {
+                modes.Add(kv.Key);
+                contents.Add(kv.Value);
+            }
+
+            int currentIndex = modes.IndexOf(StructureBuildTool.currentMode);
+            int newIndex = GUILayout.Toolbar(currentIndex, contents.ToArray(),
+                                             GUILayout.Height(32), GUILayout.MinWidth(32));
+
+            if (newIndex != currentIndex && newIndex >= 0)
+            {
+                var selected = modes[newIndex];
+                StructureBuildTool.currentMode = selected;
+                StructureBuildTool.SetBuildMode(selected);
+            }
+
+            GUILayout.FlexibleSpace();
+
+            // Disable button (simple text or its own icon)
+            if (GUILayout.Button("✖", GUILayout.Width(32), GUILayout.Height(32)))
             {
                 StructureBuildTool.currentMode = StructureBuildTool.BuildMode.None;
-                StructureBuildTool.SetBuildMode(StructureBuildTool.currentMode);
+                StructureBuildTool.SetBuildMode(StructureBuildTool.BuildMode.None);
             }
 
             EditorGUILayout.EndHorizontal();
@@ -708,11 +765,11 @@ namespace Mayuns.DSB.Editor
                 if (GUILayout.Button("Change...", GUILayout.Width(80)))
                     MeshCacheUtility.PickFolder();
 
-            
+
                 if (GUILayout.Button("Clean Unused Cached Meshes"))
                     MeshCacheUtility.CleanUnusedCache();
 
-                   EditorGUILayout.EndHorizontal(); 
+                EditorGUILayout.EndHorizontal();
             }
 
             EditorGUILayout.Space(4);
