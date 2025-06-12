@@ -142,16 +142,6 @@ namespace Mayuns.DSB
 					if (wallPiece)
 					{
 						var wp = wallPiece.GetComponent<WallPiece>();
-						if (wp != null && wp.isWindow)
-						{
-							wallPiece.SetActive(true);
-							wallPiece.hideFlags = HideFlags.None;
-
-							if (wp)
-							{
-								wp.TakeDamage(int.MaxValue);
-							}
-						}
 						if (wp != null)
 						{
 							var pos = wp.gridPosition;
@@ -262,12 +252,14 @@ namespace Mayuns.DSB
 					}
 				}
 
+
 				// Yield every few pieces or each piece to spread the load
 				if (i % 2 == 0) // Adjust this batch size as needed
 					yield return null;
 			}
 
 			Destroy(chunk.gameObject);
+			_chunks.Remove(chunk);
 			isRebuildingGrid = false;
 			ValidateWallIntegrity();
 		}

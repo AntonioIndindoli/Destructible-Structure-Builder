@@ -29,8 +29,6 @@ namespace Mayuns.DSB
 
         public enum EffectType
         {
-            MemberDestroyed,
-            WallDestroyed,
             Crumble,
             MemberStress,
             LargeCollapse,
@@ -682,7 +680,7 @@ namespace Mayuns.DSB
         {
             PlayEffects(EffectType.WindowShatter, position);
         }
-        
+
         private void PlayEffects(EffectType type, Vector3 position)
         {
             PlayEffects(type, position, 1f);
@@ -759,20 +757,15 @@ namespace Mayuns.DSB
                 "Large_Collapse_Default5"
             });
 
-            AddIfMissing(EffectType.MemberDestroyed, new[]
+            AddIfMissing(EffectType.Crumble, new[]
             {
                 "Crumble_Default1",
                 "Crumble_Default2",
                 "Crumble_Default3",
                 "Crumble_Default4",
-            });
-
-            AddIfMissing(EffectType.WallDestroyed, new[]
-            {
-                "Crumble_Default1",
-                "Crumble_Default2",
-                "Crumble_Default3",
-                "Crumble_Default4"
+                "Crumble_Default5",
+                "Crumble_Default6",
+                "Crumble_Default7",
             });
 
             AddIfMissing(EffectType.WindowShatter, new[]

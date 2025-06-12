@@ -54,7 +54,7 @@ namespace Mayuns.DSB
 
             accumulatedDamage += damage;
 
-            if (accumulatedDamage >= manager.wallPieceHealth || (isWindow && accumulatedDamage >= (manager.wallPieceHealth*.1f)))
+            if (accumulatedDamage >= manager.wallPieceHealth)
             {
                 HandleDestruction();
             }
@@ -65,7 +65,7 @@ namespace Mayuns.DSB
         /// Called when the damage threshold has been exceeded.
         /// Spawns debris and notifies the owning wall.
         /// </summary>
-        private void HandleDestruction()
+        public void HandleDestruction()
         {
             isDestroyed = true;
 
