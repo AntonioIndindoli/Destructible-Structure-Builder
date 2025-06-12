@@ -22,10 +22,15 @@ namespace Mayuns.DSB
         {
             public EffectType type;
             public AudioClip[] clips;
-            [Range(0f, 1f)]
-            public float volume = 1f;
+            [Range(0f, 1f)] public float volume = 1f;
+
+            // Per-type cooldown (seconds).  Default is 0.5 s.
+            [Min(0f)] public float cooldown = .5f;
+
             public GameObject[] particlePrefabs;
         }
+
+        private readonly Dictionary<EffectType, float> _nextPlayTime = new Dictionary<EffectType, float>();
 
         public enum EffectType
         {
@@ -53,6 +58,12 @@ namespace Mayuns.DSB
         private float validationCooldown = 0f;
         private float cleanupTimer = 0f;
         private const float cleanupInterval = 5f;
+        
+        void Awake()   
+        {
+            foreach (EffectType t in System.Enum.GetValues(typeof(EffectType)))
+                _nextPlayTime[t] = 0f;
+        }
 
         void Update()
         {
@@ -690,30 +701,27 @@ namespace Mayuns.DSB
         {
             if (effects == null) return;
 
+            // --- COOLDOWN CHECK --------------------------------------------------------
+            if (Time.time < _nextPlayTime[type]) return;      // still cooling down
+
             foreach (var effect in effects)
             {
                 if (effect.type != type) continue;
 
+                // >>> play audio -------------------------------------------------------
                 if (audioSource != null && effect.clips != null && effect.clips.Length > 0)
                 {
-                    AudioClip clip = effect.clips[Random.Range(0, effect.clips.Length)];
-                    if (clip != null)
-                    {
-                        audioSource.PlayOneShot(clip, effect.volume * volumeScale);
-                    }
+                    var clip = effect.clips[Random.Range(0, effect.clips.Length)];
+                    if (clip) audioSource.PlayOneShot(clip, effect.volume * volumeScale);
                 }
 
+                // >>> spawn particles --------------------------------------------------
                 if (effect.particlePrefabs != null)
-                {
                     foreach (var prefab in effect.particlePrefabs)
-                    {
-                        if (prefab != null)
-                        {
-                            Instantiate(prefab, position, Quaternion.identity);
-                        }
-                    }
-                }
+                        if (prefab) Instantiate(prefab, position, Quaternion.identity);
 
+                // --- SET NEXT ALLOWED PLAY TIME --------------------------------------
+                _nextPlayTime[type] = Time.time + effect.cooldown;
                 break;
             }
         }
