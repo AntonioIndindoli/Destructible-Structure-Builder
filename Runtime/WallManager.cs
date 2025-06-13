@@ -812,9 +812,8 @@ namespace Mayuns.DSB
 		/*───────────────────────────────────────────────────────────────────*\
          *  BUILD‑WALL  (editor‑only version)                                *
         \*───────────────────────────────────────────────────────────────────*/
-
-                public void BuildWall(List<WallPiece> wallGrid, bool rebuilding, StructureBuildSettings settings, bool persistMeshes = true)
-                {
+        public void BuildWall(List<WallPiece> wallGrid, bool rebuilding, StructureBuildSettings settings, bool persistMeshes = true)
+        {
 			int fp = ComputeFingerprint();   // walls that “look” the same share fp
 			_lastWallFingerprint = fp;
 

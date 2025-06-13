@@ -377,13 +377,18 @@ namespace Mayuns.DSB.Editor
                     StructureBuildTool.SetWallEditSubMode(newWallMode);
                 }
 
+                bool deselectClicked = false;
                 if (GUILayout.Button("Deselect Wall", GUILayout.Width(100)))
                 {
                     StructureBuildTool.currentWallEditSubMode = StructureBuildTool.WallEditSubMode.None;
                     StructureBuildTool.SetWallEditSubMode(StructureBuildTool.WallEditSubMode.None);
+                    deselectClicked = true;
                 }
 
                 EditorGUILayout.EndHorizontal();
+
+                if (deselectClicked || StructureBuildTool.SelectedWall == null)
+                    return;
 
                 EditorGUILayout.Space(10);
 

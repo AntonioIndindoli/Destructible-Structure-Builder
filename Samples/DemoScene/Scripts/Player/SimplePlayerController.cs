@@ -42,7 +42,6 @@ public class SimplePlayerController : MonoBehaviour
 
         if (Input.GetButtonDown("Jump"))
         {
-            print("jumped");
             yVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
             
