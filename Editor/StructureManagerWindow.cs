@@ -21,10 +21,31 @@ namespace Mayuns.DSB.Editor
         const string kPrefsKey = "SB_WALL_DESIGN_FOLDER_GUID";
         private string _lastDesignPath;
         Dictionary<StructureBuildTool.BuildMode, GUIContent> modeIcons;
+        private GUIStyle fixedIconStyle;
+        private GUIStyle FixedIconStyle
+        {
+            get
+            {
+                if (fixedIconStyle == null)
+                {
+                    fixedIconStyle = new GUIStyle(GUI.skin.button)
+                    {
+                        fixedWidth = 50,
+                        fixedHeight = 50,
+                        alignment = TextAnchor.MiddleCenter,
+                        imagePosition = ImagePosition.ImageOnly,
+                        margin = new RectOffset(2, 2, 2, 2)
+                    };
+                }
+                return fixedIconStyle;
+            }
+        }
+
         private void OnEnable()
         {
             instance = this;
             LoadModeIcons();
+
             // First try to reuse the last asset the user picked this session
             if (buildSettings == null && SessionState.GetInt("SBS_GUID_SET", 0) == 1)
             {
@@ -79,36 +100,37 @@ namespace Mayuns.DSB.Editor
 
         void LoadModeIcons()
         {
-            modeIcons = new()
-                {
-                { StructureBuildTool.BuildMode.StructuralMemberBuild,
-                    MakeIcon("StructuralMemberBuild.png",  "Structural Member Build") },
-
-                { StructureBuildTool.BuildMode.CreateStructure,
-                    MakeIcon("CreateStructure.png",        "Create Structure") },
-
-                { StructureBuildTool.BuildMode.WallBuild,
-                    MakeIcon("WallBuild.png",              "Wall Build") },
-
-                { StructureBuildTool.BuildMode.WallEdit,
-                    MakeIcon("WallEdit.png",               "Wall Edit") },
-
-                { StructureBuildTool.BuildMode.ApplyDesign,
-                    MakeIcon("ApplyDesign.png",            "Apply Design") },
-
-                { StructureBuildTool.BuildMode.ApplyMaterial,
-                    MakeIcon("ApplyMaterial.png",          "Apply Material") },
-
-                { StructureBuildTool.BuildMode.Delete,
-                    MakeIcon("Delete.png",                 "Delete") },
-                };
+            modeIcons = new Dictionary<StructureBuildTool.BuildMode, GUIContent>
+                        {
+                            { StructureBuildTool.BuildMode.CreateStructure,       MakeIcon("CreateStructure",       "Create Structure") },
+                            { StructureBuildTool.BuildMode.StructuralMemberBuild, MakeIcon("StructuralMemberBuild", "Structural Member Build") },
+                            { StructureBuildTool.BuildMode.GroundedMode,            MakeIcon("IsGrounded",            "Grounded Toggle") },
+                            { StructureBuildTool.BuildMode.WallBuild,             MakeIcon("WallBuild",             "Wall Build") },
+                            { StructureBuildTool.BuildMode.WallEdit,              MakeIcon("WallEdit",              "Wall Edit") },
+                            { StructureBuildTool.BuildMode.ApplyDesign,           MakeIcon("ApplyDesign",           "Apply Design") },
+                            { StructureBuildTool.BuildMode.ApplyMaterial,         MakeIcon("ApplyMaterial",         "Apply Material") },
+                            { StructureBuildTool.BuildMode.Delete,                MakeIcon("Delete",                "Delete") }
+                        };
         }
 
-        GUIContent MakeIcon(string file, string tooltip)
+        GUIContent MakeIcon(string fileName, string tooltip)
         {
-            var tex = EditorGUIUtility.Load($"Editor/Icons/{file}") as Texture2D;
-            return new GUIContent(tex, tooltip);
+            string[] guids = AssetDatabase.FindAssets(fileName);
+            foreach (string guid in guids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                if (path.EndsWith(fileName + ".png", System.StringComparison.OrdinalIgnoreCase))
+                {
+                    Texture2D tex = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+                    if (tex != null)
+                        return new GUIContent(tex, tooltip);
+                }
+            }
+
+            Debug.LogWarning($"[Structure Manager] Could not find icon: {fileName}");
+            return new GUIContent(tooltip); // fallback: no texture, just label
         }
+
         string GetDesignFolderPathCached()
         {
             string guid = EditorPrefs.GetString(kPrefsKey, string.Empty);
@@ -202,6 +224,12 @@ namespace Mayuns.DSB.Editor
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.BeginHorizontal("box");
 
+            if (modeIcons == null || modeIcons.Count == 0)
+            {
+                EditorGUILayout.HelpBox("Failed to load icons. Try reopening the window or check icon paths.", MessageType.Warning);
+                return;
+            }
+
             // Build an ordered list of GUIContent and an int index for Toolbar
             var contents = new List<GUIContent>();
             var modes = new List<StructureBuildTool.BuildMode>();
@@ -212,15 +240,25 @@ namespace Mayuns.DSB.Editor
                 contents.Add(kv.Value);
             }
 
-            int currentIndex = modes.IndexOf(StructureBuildTool.currentMode);
-            int newIndex = GUILayout.Toolbar(currentIndex, contents.ToArray(),
-                                             GUILayout.Height(32), GUILayout.MinWidth(32));
-
-            if (newIndex != currentIndex && newIndex >= 0)
+            if (contents.Count > 0)
             {
-                var selected = modes[newIndex];
-                StructureBuildTool.currentMode = selected;
-                StructureBuildTool.SetBuildMode(selected);
+                int currentIndex = modes.IndexOf(StructureBuildTool.currentMode);
+                int newIndex = GUILayout.SelectionGrid(
+                    currentIndex,
+                    contents.ToArray(),
+                    contents.Count,
+                    FixedIconStyle);
+
+                if (newIndex != currentIndex && newIndex >= 0)
+                {
+                    var selected = modes[newIndex];
+                    StructureBuildTool.currentMode = selected;
+                    StructureBuildTool.SetBuildMode(selected);
+                }
+            }
+            else
+            {
+                EditorGUILayout.HelpBox("No build mode icons loaded.", MessageType.Warning);
             }
 
             GUILayout.FlexibleSpace();
@@ -764,12 +802,12 @@ namespace Mayuns.DSB.Editor
 
                 if (GUILayout.Button("Change...", GUILayout.Width(80)))
                     MeshCacheUtility.PickFolder();
-
+                EditorGUILayout.EndHorizontal();
 
                 if (GUILayout.Button("Clean Unused Cached Meshes"))
                     MeshCacheUtility.CleanUnusedCache();
 
-                EditorGUILayout.EndHorizontal();
+
             }
 
             EditorGUILayout.Space(4);
