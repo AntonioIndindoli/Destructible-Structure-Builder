@@ -665,10 +665,13 @@ namespace Mayuns.DSB
                 }
             }
 
-            float tVal = Mathf.InverseLerp(1f, 100f, structuralGroup.structuralMembersHash.Count);
-            float collapseVolume = Mathf.Lerp(0.1f, .8f, tVal);
+            if (structuralGroup.structuralMembersHash.Count > 2)
+            {
+                float tVal = Mathf.InverseLerp(1f, 100f, structuralGroup.structuralMembersHash.Count);
+                float collapseVolume = Mathf.Lerp(0.1f, .8f, tVal);
 
-            PlayLargeCollapseAt(groupGO.transform.position, collapseVolume);
+                PlayLargeCollapseAt(groupGO.transform.position, collapseVolume);
+            }
         }
 
         public void PlayCrumbleAt(Vector3 position)
