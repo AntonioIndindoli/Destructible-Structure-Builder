@@ -1,125 +1,120 @@
-Destructible Structure System
+# Destructible Structure System Manual
 
-Version: <v1.0.0>Author / Publisher: Unity Compatibility: 2021.3 LTS – 2022.3
+**Version**: 1.0.0  
+**Compatibility**: Unity 2021.3 LTS – 2022.3
 
-🚀 Overview
+---
 
-This Unity package contains a complete system for building and simulating destructible structures.
+## Overview
 
-Major directories:
+Destructible Structure System provides everything you need to create interactive buildings that can crumble, shatter and collapse during play. The package ships with editor tools, runtime scripts and a complete sample scene to help you get started quickly.
 
-Runtime/ – C# scripts for gameplay.
+**Folders**
 
-Editor/ – custom editor tools and inspectors.
+- `Runtime/` – core C# scripts used at run time.
+- `Editor/` – inspectors and scene tools.
+- `Materials/`, `Textures/`, `Effects/` – demo assets such as materials, particles and audio clips.
+- `Samples/` – example scene showcasing a small structure.
 
-Materials/, Textures/, Effects/ – assets (materials, textures, particle effects, and audio).
+## Features
 
-Samples/ – sample scene.
+- **Destruction Framework** – base classes that spawn debris, apply forces and trigger events when pieces break.
+- **Wall Pieces** – grid-based wall cells with per-cell health and window support.
+- **Voxel Members** – beams and columns that split into separate groups and apply stress between neighbours.
+- **Group Manager** – coordinates member detachment, collapse audio and particle effects.
+- **GibManager** – pools debris chunks and applies random impulses.
+- **Editor Tools** – dedicated window for building, stress visualisation and quick material assignment.
+- **Scriptable Objects** – reusable presets for wall designs and structural settings.
 
-Documentation/manual.pdf – user manual (not viewed here).
+## Installation
 
+1. Download the `.unitypackage` file from the Asset Store.
+2. In Unity choose **Assets ▸ Import Package ▸ Custom Package...** and select the downloaded file.
+3. Alternatively add the package via UPM using the Git URL:
+   ```
+   https://github.com/YourOrg/YourRepo.git?path=/Packages/com.yourorg.destructiblestructure
+   ```
+4. The package depends on **TextMeshPro** (included with Unity) and optionally **URP 14+** for the provided materials.
 
+## Getting Started
 
-✨ Features
+1. Open the window **Tools ▸ Structure Build Tool**.
+2. Select or create a GameObject in your scene that will hold the structure.
+3. Use the scene view buttons to place walls, beams and supports.
+4. Press **Play** and interact with the structure using rigidbodies or scripted events.
 
-Destruction Framework – Base Destructible class for objects that crumble, spawn debris, and trigger onCrumble events via GibManager.
-
-Wall Pieces – Grid-based wall cells that manage structural state and trigger effects on destruction.
-
-Structural Members & Connections – Voxel-based beams and columns that manage splitting, detachment, and support connections.
-
-Group Manager – Coordinates structural behavior, effects, load integrity, and collapse logic.
-
-Wall Manager – Builds, detaches, and optimizes wall pieces.
-
-Chunks & Gibs – Chunk objects combine meshes; GibManager handles pooling and random force application.
-
-Utilities – Includes voxel generators, mesh combiner, cache, and debris slicers.
-
-Scriptable Objects – StructureBuildSettings and WallDesign for customizable wall and structure parameters.
-
-Editor Tools – Scene view tools for building/editing structures, material assignment, and stress visualization.
-
-Samples & Assets – Example scene and URP-compatible materials, textures, sounds, and particles.
-
-📦 Installation
-
-Import the .unitypackage (double-click or Assets ▸ Import Package ▸ Custom Package…).
-
-Or install via UPM Git URL:
-
-https://github.com/YourOrg/YourRepo.git?path=/Packages/com.yourorg.destructiblestructure
-
-Dependencies:
-
-TextMeshPro (included with Unity)
-
-URP 14 + (optional for advanced shaders)
-
-🚀 Getting Started
-
-Open the window: Tools ▸ Structure Build Tool.
-
-Select a GameObject in the scene.
-
-Use scene view modes to build and modify structural elements.
-
-Screenshot/GIF goes here:
 ![First Run](Screenshots/getting-started.gif)
 
-🛠️ Usage Guide
+## Building Structures
 
-Section
+The build window has three modes:
 
-What it does
+1. **Wall Mode** – click and drag to draw walls on the selected plane. Choose a `WallDesign` preset to set thickness and materials.
+2. **Member Mode** – place individual beams or columns to reinforce your structure.
+3. **Material Mode** – quickly apply different materials to selected pieces.
 
-Structure Build Tool
+Use the **Stress Visualizer** to preview which members carry the most load while in Edit mode.
 
-Enables building and editing walls, beams, and materials
+### Scene Setup Tips
 
-StructuralGroupManager
+- Keep the centre of the structure at the origin so pooled debris reuse works correctly.
+- Assign your own sounds and particle effects by creating a **StructuralEffects** asset and referencing it from the `StructuralGroupManager` component.
+- To improve performance combine static meshes with the supplied **ChunkCombiner** utility.
 
-Manages structural integrity and effects
+## Scripting API
 
-WallPiece
+The system exposes several useful events:
 
-Handles per-cell damage and debris spawning
+- `MemberPiece.onDestroyed` – called when an individual member is broken.
+- `WallPiece.onDestroyed` – fired when a wall cell crumbles.
+- `WallPiece.onWindowShatter` – invoked specifically for window cells.
+- `Destructible.onCrumble` – triggered when an entire destructible object collapses.
 
-GibManager
+Subscribe to these events to spawn additional effects or drive gameplay logic.
 
-Pools and spawns debris with optional explosion forces
+```
+public class ExplosionTrigger : MonoBehaviour
+{
+    public Destructible target;
 
-Stress Gizmo
+    void Start()
+    {
+        target.onCrumble.AddListener(OnStructureCrumble);
+    }
 
-Visualizes member stress levels in Scene view
+    void OnStructureCrumble()
+    {
+        // your custom behaviour here
+    }
+}
+```
 
-<Add more sub-sections, code snippets for API calls, best-practice tips, etc.>
+## FAQ
 
-❓ FAQ & Troubleshooting
+**The build window shows nothing.**  
+Make sure you are in **Scene** view and a GameObject is selected.
 
-The window is blank
+**Undo is not restoring previous builds.**  
+Check **Edit ▸ Preferences ▸ Undo** and set steps to at least 99.
 
-Make sure you are in the Scene view and a valid GameObject is selected.
+**Pieces fall apart immediately.**  
+Verify that colliders do not intersect each other when the simulation starts.
 
-Undo isn’t working
+## Support
 
-Confirm Edit ▸ Preferences ▸ Undo is set to at least 99 steps.
+For assistance or to report bugs:
 
-🗒️ Changelog
+- Email: support@yourdomain.com
+- Forum: [Unity Forum Thread](https://forum.unity.com/threads/destructible-structure-system)
+- Issue Tracker: [GitHub Issues](https://github.com/YourOrg/DestructibleStructure/issues)
 
-### v1.0.0 – 2025-06-13
-- Initial release with destruction system, editor tools, and sample assets
+## Changelog
 
-🧑‍💻 Support
+### 1.0.0 – 2025‑06‑13
+- Initial release with full destruction framework, editor tools and sample assets.
 
-Email: support@yourdomain.com
+## License
 
-Forum Thread: https://forum.unity.com/threads/destructible-structure-system
+This asset is distributed under the Unity Asset Store End-User License. See `LICENSE.md` for full terms.
 
-Issue Tracker / Feature Requests: https://github.com/YourOrg/DestructibleStructure/issues
-
-📄 License
-
-This asset is distributed under the Unity Asset Store End-User License.See LICENSE.md for full terms.
-
-© 2025 <Your Name / Studio>. All rights reserved.
+© 2025 Your Name / Studio. All rights reserved.
