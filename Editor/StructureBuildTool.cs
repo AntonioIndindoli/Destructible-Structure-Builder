@@ -94,6 +94,7 @@ namespace Mayuns.DSB.Editor
             if (previousMode == BuildMode.WallEdit && newMode != BuildMode.WallEdit)
             {
                 SetWallEditSubMode(WallEditSubMode.None);
+                CheckMeshPersistenceForScene();
             }
 
             // Reset any state when switching off modes.
@@ -110,16 +111,10 @@ namespace Mayuns.DSB.Editor
             }
             ManagerWindow.RepaintIfOpen();
             SceneView.RepaintAll();
-            CheckMeshPersistenceForScene();
         }
 
         public static void SetWallEditSubMode(WallEditSubMode subMode)
         {
-            if (currentWallEditSubMode != subMode && subMode == WallEditSubMode.None && selectedWall != null)
-            {
-                selectedWall.BuildWall(selectedWall.wallGrid, true, buildSettings, true);
-            }
-
             currentWallEditSubMode = subMode;
             Debug.Log($"Wall Edit SubMode: {subMode}");
             if (subMode == WallEditSubMode.None)
@@ -602,7 +597,7 @@ namespace Mayuns.DSB.Editor
             wall.textureScaleY = buildSettings.wallTextureScaleY;
             wall.InstantUncombine();
             wall.RelinkWallGridReferences();
-            wall.BuildWall(wall.wallGrid, true, buildSettings, true);
+            wall.BuildWall(wall.wallGrid, true, buildSettings, false);
             EditorUtility.SetDirty(wall);
         }
 
@@ -735,7 +730,7 @@ namespace Mayuns.DSB.Editor
             wall.glassMaterial = buildSettings.glassMaterial;
             wall.wallMaterial = buildSettings.wallMaterial;
 
-            wall.BuildWall(wall.wallGrid, true, buildSettings, true);
+            wall.BuildWall(wall.wallGrid, true, buildSettings, false);
             EditorUtility.SetDirty(wall);
         }
 
@@ -769,7 +764,7 @@ namespace Mayuns.DSB.Editor
             wall.glassMaterial = buildSettings.glassMaterial;
             wall.wallMaterial = buildSettings.wallMaterial;
 
-            wall.BuildWall(wall.wallGrid, true, buildSettings, true);
+            wall.BuildWall(wall.wallGrid, true, buildSettings, false);
             EditorUtility.SetDirty(wall);
         }
 
@@ -800,7 +795,7 @@ namespace Mayuns.DSB.Editor
             wall.glassMaterial = buildSettings.glassMaterial;
             wall.wallMaterial = buildSettings.wallMaterial;
 
-            wall.BuildWall(wall.wallGrid, true, buildSettings, true);
+            wall.BuildWall(wall.wallGrid, true, buildSettings, false);
             EditorUtility.SetDirty(wall);
         }
 
@@ -877,7 +872,7 @@ namespace Mayuns.DSB.Editor
             wall.glassMaterial = buildSettings.glassMaterial;
             wall.wallMaterial = buildSettings.wallMaterial;
 
-            wall.BuildWall(wall.wallGrid, true, buildSettings, true);
+            wall.BuildWall(wall.wallGrid, true, buildSettings, false);
 
             EditorUtility.SetDirty(wall);
         }
@@ -926,7 +921,7 @@ namespace Mayuns.DSB.Editor
             wall.glassMaterial = buildSettings.glassMaterial;
             wall.wallMaterial = buildSettings.wallMaterial;
 
-            wall.BuildWall(wall.wallGrid, true, buildSettings, true);
+            wall.BuildWall(wall.wallGrid, true, buildSettings, false);
             EditorUtility.SetDirty(wall);
         }
 
@@ -1034,7 +1029,7 @@ namespace Mayuns.DSB.Editor
             // --- apply materials & rebuild mesh ---
             wall.wallMaterial = buildSettings.wallMaterial;
             wall.glassMaterial = buildSettings.glassMaterial;
-            wall.BuildWall(wall.wallGrid, true, buildSettings, true);
+            wall.BuildWall(wall.wallGrid, true, buildSettings, false);
 
             EditorUtility.SetDirty(wall);
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(wall.gameObject.scene);
@@ -1529,7 +1524,7 @@ namespace Mayuns.DSB.Editor
             {
                 spawnedWall.glassMaterial = buildSettings.glassMaterial;
                 spawnedWall.wallMaterial = buildSettings.wallMaterial;
-                spawnedWall.BuildWall(spawnedWall.wallGrid, false, buildSettings);
+                spawnedWall.BuildWall(spawnedWall.wallGrid, false, buildSettings, true);
             }
         }
 

@@ -1,8 +1,14 @@
-Overview
+Destructible Structure System
 
-This Unity package contains a complete system for building and simulating destructible structures. Major directories:
+Version: <v1.0.0>Author / Publisher: Unity Compatibility: 2021.3 LTS – 2022.3
 
-Runtime/ – C\# scripts for gameplay.
+🚀 Overview
+
+This Unity package contains a complete system for building and simulating destructible structures.
+
+Major directories:
+
+Runtime/ – C# scripts for gameplay.
 
 Editor/ – custom editor tools and inspectors.
 
@@ -12,64 +18,108 @@ Samples/ – sample scene.
 
 Documentation/manual.pdf – user manual (not viewed here).
 
-Key Features & Systems
 
-Destruction Framework
 
-Destructible is the base class for objects that can crumble into debris. It stores pre‑generated mesh fragments and invokes an onCrumble event when destroyed. Debris pieces are spawned via a global GibManager. 
+✨ Features
 
-Wall Pieces
+Destruction Framework – Base Destructible class for objects that crumble, spawn debris, and trigger onCrumble events via GibManager.
 
-WallPiece represents a single cell in a wall grid. It keeps references to its WallManager, attached structural members, and exposes onDestroyed and onWindowShatter events. When damage exceeds a threshold it plays effects via the owning group manager and spawns debris. 
+Wall Pieces – Grid-based wall cells that manage structural state and trigger effects on destruction.
 
-Structural Members and Connections
+Structural Members & Connections – Voxel-based beams and columns that manage splitting, detachment, and support connections.
 
-StructuralMember builds voxel pieces to form beams or columns. It manages splitting, detaching, and adjacency after pieces break.
+Group Manager – Coordinates structural behavior, effects, load integrity, and collapse logic.
 
-StructuralConnection links members and can be damaged or destroyed. Slots identify relative directions (top, bottom, etc.) with helper lookups.
+Wall Manager – Builds, detaches, and optimizes wall pieces.
 
-Both types derive from Destructible.
+Chunks & Gibs – Chunk objects combine meshes; GibManager handles pooling and random force application.
 
-Group Manager
+Utilities – Includes voxel generators, mesh combiner, cache, and debris slicers.
 
-StructuralGroupManager orchestrates all members, connections, and walls in a structure. It handles load propagation, validates integrity, spawns effects (crumble, member stress, large collapse, window shatter) and maintains cooldowns for sounds and particle effects. 
+Scriptable Objects – StructureBuildSettings and WallDesign for customizable wall and structure parameters.
 
-Wall Manager
+Editor Tools – Scene view tools for building/editing structures, material assignment, and stress visualization.
 
-Builds walls out of WallPiece cells, including windows or triangles. It detaches chunks when damaged and recombines pieces into chunks for performance.
+Samples & Assets – Example scene and URP-compatible materials, textures, sounds, and particles.
 
-Chunks & Gibs
+📦 Installation
 
-Chunk acts as a proxy for combined meshes.
+Import the .unitypackage (double-click or Assets ▸ Import Package ▸ Custom Package…).
 
-GibManager pools debris pieces, tracks active gib counts, and can apply random explosion forces. 
+Or install via UPM Git URL:
 
-Utilities
+https://github.com/YourOrg/YourRepo.git?path=/Packages/com.yourorg.destructiblestructure
 
-VoxelBuildingUtility creates irregular cubes, windows, and triangular wall pieces procedurally.
+Dependencies:
 
-MeshCombinerUtility merges meshes by material to produce combined chunks. 
+TextMeshPro (included with Unity)
 
-MeshCacheUtility (editor-only) caches generated meshes to disk.
+URP 14 + (optional for advanced shaders)
 
-GibBuildingUtility slices meshes into fragments for debris generation.
+🚀 Getting Started
 
-Scriptable Objects
+Open the window: Tools ▸ Structure Build Tool.
 
-StructureBuildSettings defines configurable parameters for building structures and walls (member length/thickness, materials, wall dimensions, voxel health/mass, etc.). 
+Select a GameObject in the scene.
 
-WallDesign stores custom wall templates.
+Use scene view modes to build and modify structural elements.
 
-Editor Tools
+Screenshot/GIF goes here:
+![First Run](Screenshots/getting-started.gif)
 
-StructureBuildTool provides scene view modes for creating structures, building members/walls, editing walls, applying materials, and deleting elements. It responds to mouse input and draws gizmos.
+🛠️ Usage Guide
 
-Custom inspectors (MemberPieceEditor, StructuralGroupManagerEditor) expose debug info and settings in the Inspector.
+Section
 
-StructuralMemberStressGizmo visualizes member stress levels in the Scene view.
+What it does
 
-Samples and Assets
+Structure Build Tool
 
-Example scene under Samples/DemoScene demonstrates usage.
+Enables building and editing walls, beams, and materials
 
-Built‑in and URP materials, textures, default sound clips, and particle prefabs ship with the package for immediate use.  
+StructuralGroupManager
+
+Manages structural integrity and effects
+
+WallPiece
+
+Handles per-cell damage and debris spawning
+
+GibManager
+
+Pools and spawns debris with optional explosion forces
+
+Stress Gizmo
+
+Visualizes member stress levels in Scene view
+
+<Add more sub-sections, code snippets for API calls, best-practice tips, etc.>
+
+❓ FAQ & Troubleshooting
+
+The window is blank
+
+Make sure you are in the Scene view and a valid GameObject is selected.
+
+Undo isn’t working
+
+Confirm Edit ▸ Preferences ▸ Undo is set to at least 99 steps.
+
+🗒️ Changelog
+
+### v1.0.0 – 2025-06-13
+- Initial release with destruction system, editor tools, and sample assets
+
+🧑‍💻 Support
+
+Email: support@yourdomain.com
+
+Forum Thread: https://forum.unity.com/threads/destructible-structure-system
+
+Issue Tracker / Feature Requests: https://github.com/YourOrg/DestructibleStructure/issues
+
+📄 License
+
+This asset is distributed under the Unity Asset Store End-User License.See LICENSE.md for full terms.
+
+© 2025 <Your Name / Studio>. All rights reserved.
