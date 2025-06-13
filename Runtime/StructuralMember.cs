@@ -658,6 +658,26 @@ namespace Mayuns.DSB
                                 }
                         }
                 }
+
+#if UNITY_EDITOR
+                public void EnsureMeshesPersisted()
+                {
+                        int fp = ComputeFingerprint();
+                        if (memberPieces != null)
+                        {
+                                for (int i = 0; i < memberPieces.Length; i++)
+                                {
+                                        GameObject go = memberPieces[i];
+                                        if (!go) continue;
+                                        var mf = go.GetComponent<MeshFilter>();
+                                        if (mf && mf.sharedMesh && string.IsNullOrEmpty(AssetDatabase.GetAssetPath(mf.sharedMesh)))
+                                        {
+                                                mf.sharedMesh = MeshCacheUtility.PersistPiece(mf.sharedMesh, fp, i);
+                                        }
+                                }
+                        }
+                }
+#endif
 #endif
 	}
 
