@@ -30,75 +30,42 @@ Destructible Structure System provides everything you need to create interactive
 
 1. Download the `.unitypackage` file from the Asset Store.
 2. In Unity choose **Assets ▸ Import Package ▸ Custom Package...** and select the downloaded file.
-3. Alternatively add the package via UPM using the Git URL:
-   ```
-   https://github.com/YourOrg/YourRepo.git?path=/Packages/com.yourorg.destructiblestructure
-   ```
-4. The package depends on **TextMeshPro** (included with Unity) and optionally **URP 14+** for the provided materials.
 
 ## Getting Started
 
 1. Open the window **Tools ▸ Structure Build Tool**.
-2. Select or create a GameObject in your scene that will hold the structure.
-3. Use the scene view buttons to place walls, beams and supports.
-4. Press **Play** and interact with the structure using rigidbodies or scripted events.
+2. 
+3. 
+4. 
 
 ![First Run](Screenshots/getting-started.gif)
 
 ## Building Structures
 
-The build window has three modes:
+The build window has multiple modes:
 
 1. **Wall Mode** – click and drag to draw walls on the selected plane. Choose a `WallDesign` preset to set thickness and materials.
 2. **Member Mode** – place individual beams or columns to reinforce your structure.
 3. **Material Mode** – quickly apply different materials to selected pieces.
-
-Use the **Stress Visualizer** to preview which members carry the most load while in Edit mode.
+4. 
 
 ### Scene Setup Tips
 
-- Keep the centre of the structure at the origin so pooled debris reuse works correctly.
-- Assign your own sounds and particle effects by creating a **StructuralEffects** asset and referencing it from the `StructuralGroupManager` component.
-- To improve performance combine static meshes with the supplied **ChunkCombiner** utility.
+- 
+- 
+- 
 
 ## Scripting API
 
 The system exposes several useful events:
 
-- `MemberPiece.onDestroyed` – called when an individual member is broken.
-- `WallPiece.onDestroyed` – fired when a wall cell crumbles.
 - `WallPiece.onWindowShatter` – invoked specifically for window cells.
-- `Destructible.onCrumble` – triggered when an entire destructible object collapses.
+- `Destructible.onCrumble` – triggered when a destructible voxel crumbles.
 
 Subscribe to these events to spawn additional effects or drive gameplay logic.
 
-```
-public class ExplosionTrigger : MonoBehaviour
-{
-    public Destructible target;
-
-    void Start()
-    {
-        target.onCrumble.AddListener(OnStructureCrumble);
-    }
-
-    void OnStructureCrumble()
-    {
-        // your custom behaviour here
-    }
-}
-```
-
 ## FAQ
 
-**The build window shows nothing.**  
-Make sure you are in **Scene** view and a GameObject is selected.
-
-**Undo is not restoring previous builds.**  
-Check **Edit ▸ Preferences ▸ Undo** and set steps to at least 99.
-
-**Pieces fall apart immediately.**  
-Verify that colliders do not intersect each other when the simulation starts.
 
 ## Support
 
@@ -117,4 +84,4 @@ For assistance or to report bugs:
 
 This asset is distributed under the Unity Asset Store End-User License. See `LICENSE.md` for full terms.
 
-© 2025 Your Name / Studio. All rights reserved.
+© 2025 Mayuns Technologies. All rights reserved.

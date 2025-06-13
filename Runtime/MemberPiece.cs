@@ -11,8 +11,6 @@ namespace Mayuns.DSB
         [HideInInspector] public bool isDestroyed = false;
         [HideInInspector] public StructuralMember member;
         public float accumulatedDamage = 0;
-        [Header("Destruction Events")]
-        public UnityEvent onDestroyed;
 
         void Start()
         {
@@ -33,8 +31,7 @@ namespace Mayuns.DSB
             if (accumulatedDamage >= member.voxelHealth)
             {
                 isDestroyed = true;
-
-                onDestroyed?.Invoke();
+                
                 if (member != null && member.structuralGroup != null)
                 {
                     member.structuralGroup.PlayCrumbleAt(transform.position);

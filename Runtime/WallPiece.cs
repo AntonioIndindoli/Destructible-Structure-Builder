@@ -17,7 +17,6 @@ namespace Mayuns.DSB
         [HideInInspector] public bool isEdge = false;
         [HideInInspector] public bool isProxy = false;
         [HideInInspector] public float accumulatedDamage = 0;
-        public UnityEvent onDestroyed;
         public UnityEvent onWindowShatter;
         public enum TriangularCornerDesignation
         {
@@ -79,7 +78,6 @@ namespace Mayuns.DSB
             }
             else
             {
-                onDestroyed?.Invoke();
                 if (manager != null && manager.structuralGroup != null)
                 {
                     manager.structuralGroup.PlayCrumbleAt(transform.position);
@@ -93,8 +91,6 @@ namespace Mayuns.DSB
             }
 
             Crumble();
-
         }
-
     }
 }
