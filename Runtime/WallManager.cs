@@ -286,9 +286,9 @@ namespace Mayuns.DSB
 						}
 					}
 #if UNITY_EDITOR
-					DestroyImmediate(chunk.gameObject);
+                                        Undo.DestroyObjectImmediate(chunk.gameObject);
 #else
-					Destroy(chunk.gameObject);
+                                        Destroy(chunk.gameObject);
 #endif
 				}
 			}

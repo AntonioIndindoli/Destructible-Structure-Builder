@@ -638,8 +638,8 @@ namespace Mayuns.DSB.Editor
                 if (GUILayout.Button("Create GibManager in Scene"))
                 {
                     GameObject newGibManagerGO = new GameObject("GibManager");
-                    gibManager = newGibManagerGO.AddComponent<GibManager>();
                     Undo.RegisterCreatedObjectUndo(newGibManagerGO, "Create GibManager");
+                    gibManager = Undo.AddComponent<GibManager>(newGibManagerGO);
                     Selection.activeObject = newGibManagerGO;
                 }
                 return;

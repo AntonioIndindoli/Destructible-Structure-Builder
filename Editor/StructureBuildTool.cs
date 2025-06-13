@@ -295,17 +295,18 @@ namespace Mayuns.DSB.Editor
                 GameObject newStructure = new GameObject("NewStructure");
                 Undo.RegisterCreatedObjectUndo(newStructure, "Create New Structure");
                 newStructure.transform.position = spawnPosition;
-                StructuralGroupManager structuralGroup = newStructure.AddComponent<StructuralGroupManager>();
-                Rigidbody rb = newStructure.AddComponent<Rigidbody>();
+                StructuralGroupManager structuralGroup = Undo.AddComponent<StructuralGroupManager>(newStructure);
+                Rigidbody rb = Undo.AddComponent<Rigidbody>(newStructure);
                 rb.isKinematic = true;
                 GameObject connectionGO = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                Undo.RegisterCreatedObjectUndo(connectionGO, "Create StructuralConnection");
                 connectionGO.name = "StructuralConnection";
 
                 connectionGO.transform.position = spawnPosition;
                 connectionGO.transform.localScale = Vector3.one * buildSettings.memberThickness;
                 connectionGO.transform.SetParent(newStructure.transform, true);
 
-                StructuralConnection connectionReference = connectionGO.AddComponent<StructuralConnection>();
+                StructuralConnection connectionReference = Undo.AddComponent<StructuralConnection>(connectionGO);
                 connectionReference.textureScaleX = buildSettings.memberTextureScaleX;
                 connectionReference.textureScaleY = buildSettings.memberTextureScaleY;
                 connectionReference.BuildConnection();
@@ -323,10 +324,10 @@ namespace Mayuns.DSB.Editor
                 structuralGroup.audioSource = structuralGroup.GetComponent<AudioSource>();
                 if (structuralGroup.audioSource == null)
                 {
-                    structuralGroup.audioSource = structuralGroup.gameObject.AddComponent<AudioSource>();
+                    structuralGroup.audioSource = Undo.AddComponent<AudioSource>(structuralGroup.gameObject);
                 }
                 structuralGroup.EnsureDefaultEffects();
-                connectionGO.AddComponent<BoxCollider>();
+                Undo.AddComponent<BoxCollider>(connectionGO);
 
                 Debug.Log($"New structure created at {spawnPosition}");
                 EditorUtility.SetDirty(newStructure);
@@ -779,8 +780,9 @@ namespace Mayuns.DSB.Editor
             }
 
             GameObject newPiece = new GameObject("WallPiece");
+            Undo.RegisterCreatedObjectUndo(newPiece, "Create WallPiece");
             newPiece.transform.SetParent(wall.transform, false);
-            WallPiece newPieceComponent = newPiece.AddComponent<WallPiece>();
+            WallPiece newPieceComponent = Undo.AddComponent<WallPiece>(newPiece);
             wall.wallGrid[idx] = newPieceComponent;
 
             wall.glassMaterial = buildSettings.glassMaterial;
@@ -871,11 +873,10 @@ namespace Mayuns.DSB.Editor
         private static WallPiece CreateWallPieceUndoable(Transform parent, bool isWindow, bool isTriangle, object triangleType = null)
         {
             GameObject go = new GameObject("WallPiece");
+            Undo.RegisterCreatedObjectUndo(go, "Create WallPiece");
             go.transform.SetParent(parent, false);
 
-            Undo.RegisterCreatedObjectUndo(go, "Create WallPiece");
-
-            WallPiece piece = go.AddComponent<WallPiece>();
+            WallPiece piece = Undo.AddComponent<WallPiece>(go);
             piece.isWindow = isWindow;
 
             if (isTriangle && triangleType is WallDesign.CellType type)
