@@ -140,13 +140,8 @@ namespace Mayuns.DSB
 
         void Start()
         {
-            BuildConnection();
             CreateAndStoreDebrisData(1, false);
         }
-
-#if UNITY_EDITOR
-        void OnValidate() => BuildConnection();
-#endif
 
         /// <summary>
         /// Remove this connection when no members remain attached.

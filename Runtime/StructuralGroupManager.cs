@@ -665,8 +665,8 @@ namespace Mayuns.DSB
                 }
             }
 
-            float tVal = Mathf.InverseLerp(1f, 50f, structuralGroup.structuralMembersHash.Count);
-            float collapseVolume = Mathf.Lerp(0.1f, 1f, tVal);
+            float tVal = Mathf.InverseLerp(1f, 100f, structuralGroup.structuralMembersHash.Count);
+            float collapseVolume = Mathf.Lerp(0.1f, .8f, tVal);
 
             PlayLargeCollapseAt(groupGO.transform.position, collapseVolume);
         }

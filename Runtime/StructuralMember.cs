@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 #if UNITY_EDITOR
@@ -168,7 +169,6 @@ namespace Mayuns.DSB
 			ShrinkIfValid(destroyedIndex + 1);
 		}
 
-
 		public void DestroyRandomMemberPiece()
 		{
 			if (isDestroyed || memberPieces == null || memberPieces.Length == 0)
@@ -176,13 +176,21 @@ namespace Mayuns.DSB
 
 			UncombineMember();
 
+			StartCoroutine(DelayedDestroy());
+		}
+
+		private IEnumerator DelayedDestroy()
+		{
+			// Wait one frame to allow Start() methods to run
+			yield return null;
+
 			// Get all non-null and not-yet-destroyed pieces
 			List<GameObject> validPieces = memberPieces
 				.Where(p => p != null && !p.GetComponent<MemberPiece>().isDestroyed)
 				.ToList();
 
 			if (validPieces.Count == 0)
-				return;
+				yield break;
 
 			// Pick a random piece to destroy
 			GameObject randomPiece = validPieces[Random.Range(0, validPieces.Count)];
@@ -190,7 +198,7 @@ namespace Mayuns.DSB
 
 			if (memberPiece != null && !memberPiece.isDestroyed)
 			{
-				memberPiece.TakeDamage(voxelHealth*999f);
+				memberPiece.TakeDamage(voxelHealth * 999f);
 			}
 		}
 
