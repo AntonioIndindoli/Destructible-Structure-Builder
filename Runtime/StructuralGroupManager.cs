@@ -722,6 +722,20 @@ namespace Mayuns.DSB
                             var obj = Instantiate(prefab, position, Quaternion.identity);
                             if (type == EffectType.LargeCollapse)
                                 obj.transform.localScale *= (1f + volumeScale);
+
+                            // destroy particle object once all systems have finished
+                            var systems = obj.GetComponentsInChildren<ParticleSystem>();
+                            float maxLifetime = 0f;
+                            foreach (var ps in systems)
+                            {
+                                var main = ps.main;
+                                float lifetime = main.duration + main.startLifetime.constantMax;
+                                if (lifetime > maxLifetime)
+                                    maxLifetime = lifetime;
+                            }
+                            if (maxLifetime <= 0f)
+                                maxLifetime = 5f; // fallback
+                            Destroy(obj, maxLifetime);
                         }
 
                 // --- SET NEXT ALLOWED PLAY TIME --------------------------------------
