@@ -87,8 +87,14 @@ namespace Mayuns.DSB.Editor
 
         public static void SetBuildMode(BuildMode newMode)
         {
+            var previousMode = currentMode;
             currentMode = newMode;
             Debug.Log($"Build Mode: {newMode}");
+
+            if (previousMode == BuildMode.WallEdit && newMode != BuildMode.WallEdit)
+            {
+                SetWallEditSubMode(WallEditSubMode.None);
+            }
 
             // Reset any state when switching off modes.
             if (newMode == BuildMode.None)
@@ -108,6 +114,11 @@ namespace Mayuns.DSB.Editor
 
         public static void SetWallEditSubMode(WallEditSubMode subMode)
         {
+            if (currentWallEditSubMode != subMode && subMode == WallEditSubMode.None && selectedWall != null)
+            {
+                selectedWall.BuildWall(selectedWall.wallGrid, true, buildSettings, true);
+            }
+
             currentWallEditSubMode = subMode;
             Debug.Log($"Wall Edit SubMode: {subMode}");
             if (subMode == WallEditSubMode.None)
@@ -590,7 +601,7 @@ namespace Mayuns.DSB.Editor
             wall.textureScaleY = buildSettings.wallTextureScaleY;
             wall.InstantUncombine();
             wall.RelinkWallGridReferences();
-            wall.BuildWall(wall.wallGrid, true, buildSettings);
+            wall.BuildWall(wall.wallGrid, true, buildSettings, false);
             EditorUtility.SetDirty(wall);
         }
 
@@ -723,7 +734,7 @@ namespace Mayuns.DSB.Editor
             wall.glassMaterial = buildSettings.glassMaterial;
             wall.wallMaterial = buildSettings.wallMaterial;
 
-            wall.BuildWall(wall.wallGrid, true, buildSettings);
+            wall.BuildWall(wall.wallGrid, true, buildSettings, false);
             EditorUtility.SetDirty(wall);
         }
 
@@ -757,7 +768,7 @@ namespace Mayuns.DSB.Editor
             wall.glassMaterial = buildSettings.glassMaterial;
             wall.wallMaterial = buildSettings.wallMaterial;
 
-            wall.BuildWall(wall.wallGrid, true, buildSettings);
+            wall.BuildWall(wall.wallGrid, true, buildSettings, false);
             EditorUtility.SetDirty(wall);
         }
 
@@ -788,7 +799,7 @@ namespace Mayuns.DSB.Editor
             wall.glassMaterial = buildSettings.glassMaterial;
             wall.wallMaterial = buildSettings.wallMaterial;
 
-            wall.BuildWall(wall.wallGrid, true, buildSettings);
+            wall.BuildWall(wall.wallGrid, true, buildSettings, false);
             EditorUtility.SetDirty(wall);
         }
 
@@ -865,7 +876,7 @@ namespace Mayuns.DSB.Editor
             wall.glassMaterial = buildSettings.glassMaterial;
             wall.wallMaterial = buildSettings.wallMaterial;
 
-            wall.BuildWall(wall.wallGrid, true, buildSettings);
+            wall.BuildWall(wall.wallGrid, true, buildSettings, false);
 
             EditorUtility.SetDirty(wall);
         }
@@ -914,7 +925,7 @@ namespace Mayuns.DSB.Editor
             wall.glassMaterial = buildSettings.glassMaterial;
             wall.wallMaterial = buildSettings.wallMaterial;
 
-            wall.BuildWall(wall.wallGrid, true, buildSettings);
+            wall.BuildWall(wall.wallGrid, true, buildSettings, false);
             EditorUtility.SetDirty(wall);
         }
 
@@ -1022,7 +1033,7 @@ namespace Mayuns.DSB.Editor
             // --- apply materials & rebuild mesh ---
             wall.wallMaterial = buildSettings.wallMaterial;
             wall.glassMaterial = buildSettings.glassMaterial;
-            wall.BuildWall(wall.wallGrid, true, buildSettings);
+            wall.BuildWall(wall.wallGrid, true, buildSettings, false);
 
             EditorUtility.SetDirty(wall);
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(wall.gameObject.scene);

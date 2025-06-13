@@ -774,8 +774,8 @@ namespace Mayuns.DSB
          *  BUILD‑WALL  (editor‑only version)                                *
         \*───────────────────────────────────────────────────────────────────*/
 
-		public void BuildWall(List<WallPiece> wallGrid, bool rebuilding, StructureBuildSettings settings)
-		{
+                public void BuildWall(List<WallPiece> wallGrid, bool rebuilding, StructureBuildSettings settings, bool persistMeshes = true)
+                {
 			int fp = ComputeFingerprint();   // walls that “look” the same share fp
 			_lastWallFingerprint = fp;
 
@@ -916,20 +916,21 @@ namespace Mayuns.DSB
 						voxelComp.isWindow = isWindow;
 						voxelComp.cornerDesignation = isTri ? old.cornerDesignation : 0;
 
-						MeshFilter mf = voxelGO.GetComponent<MeshFilter>();
-						if (mf && mf.sharedMesh)
-							mf.sharedMesh = MeshCacheUtility.PersistPiece(mf.sharedMesh, fp, idx);
+                                                MeshFilter mf = voxelGO.GetComponent<MeshFilter>();
+                                                if (mf && mf.sharedMesh && persistMeshes)
+                                                        mf.sharedMesh = MeshCacheUtility.PersistPiece(mf.sharedMesh, fp, idx);
 					}
 
 					/*‑‑ common finalisation –‑*/
 					SetupWallComponent(voxelComp, localPos, gx, gy, isWindow);
 				}
 
-			if (numColumns > 1 && numRows > 1)
-				CombineWall();
+                        if (numColumns > 1 && numRows > 1)
+                                CombineWall(persistMeshes);
 
-			MeshCacheUtility.CleanUnusedCache(); // Auto clean cache to prevent leaks
-		}
+                        if (persistMeshes)
+                                MeshCacheUtility.CleanUnusedCache(); // Auto clean cache to prevent leaks
+                }
 
 		void OnEnable()
 		{
@@ -994,18 +995,18 @@ namespace Mayuns.DSB
 			wallGrid[x + y * numColumns] = wallComponent;
 		}
 
-		public void CombineWall()
-		{
-			_chunks.RemoveAll(chunk => chunk == null);
+                public void CombineWall(bool persistMeshes)
+                {
+                        _chunks.RemoveAll(chunk => chunk == null);
 
-			for (int gx = 0; gx < numColumns; gx += numColumns / 2)
-			{
-				for (int gy = 0; gy < numRows; gy += numRows / 2)
-				{
-					BuildChunk(gx, gy);
-				}
-			}
-		}
+                        for (int gx = 0; gx < numColumns; gx += numColumns / 2)
+                        {
+                                for (int gy = 0; gy < numRows; gy += numRows / 2)
+                                {
+                                        BuildChunk(gx, gy, persistMeshes);
+                                }
+                        }
+                }
 		// Called after undo/redo to re-link grid references
 		public void RelinkWallGridReferences()
 		{
@@ -1048,8 +1049,8 @@ namespace Mayuns.DSB
 			}
 		}
 
-		void BuildChunk(int startX, int startY)
-		{
+                void BuildChunk(int startX, int startY, bool persistMeshes)
+                {
 			var windowSet = new HashSet<WallPiece>();
 			var nonWindowSet = new HashSet<WallPiece>();
 
@@ -1078,16 +1079,16 @@ namespace Mayuns.DSB
 			}
 
 			// Process window groups
-			foreach (var group in GetConnectedGroups(windowSet))
-				CreateChunkFromGroup(group, $"window_chunk_{startX}_{startY}", true);
+                        foreach (var group in GetConnectedGroups(windowSet))
+                                CreateChunkFromGroup(group, $"window_chunk_{startX}_{startY}", true, persistMeshes);
 
 			// Process non-window groups
-			foreach (var group in GetConnectedGroups(nonWindowSet))
-				CreateChunkFromGroup(group, $"chunk_{startX}_{startY}", false);
+                        foreach (var group in GetConnectedGroups(nonWindowSet))
+                                CreateChunkFromGroup(group, $"chunk_{startX}_{startY}", false, persistMeshes);
 		}
 
-		void CreateChunkFromGroup(List<WallPiece> group, string namePrefix, bool isWindow)
-		{
+                void CreateChunkFromGroup(List<WallPiece> group, string namePrefix, bool isWindow, bool persistMeshes)
+                {
 			if (group.Count == 0) return;
 
 			int chunkIdx = _chunks.Count;
@@ -1124,11 +1125,11 @@ namespace Mayuns.DSB
 
 				Undo.RegisterCreatedObjectUndo(combinedGO, "Create Combined Wall Chunk");
 
-				var mfNew = combinedGO.GetComponent<MeshFilter>();
-				if (mfNew && mfNew.sharedMesh)
-				{
-					mfNew.sharedMesh = MeshCacheUtility.PersistChunk(mfNew.sharedMesh, fp, chunkIdx);
-				}
+                                var mfNew = combinedGO.GetComponent<MeshFilter>();
+                                if (mfNew && mfNew.sharedMesh && persistMeshes)
+                                {
+                                        mfNew.sharedMesh = MeshCacheUtility.PersistChunk(mfNew.sharedMesh, fp, chunkIdx);
+                                }
 			}
 
 
