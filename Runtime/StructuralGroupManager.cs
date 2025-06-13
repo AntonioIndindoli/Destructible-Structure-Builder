@@ -717,7 +717,12 @@ namespace Mayuns.DSB
                 // >>> spawn particles --------------------------------------------------
                 if (effect.particlePrefabs != null)
                     foreach (var prefab in effect.particlePrefabs)
-                        if (prefab) Instantiate(prefab, position, Quaternion.identity);
+                        if (prefab)
+                        {
+                            var obj = Instantiate(prefab, position, Quaternion.identity);
+                            if (type == EffectType.LargeCollapse)
+                                obj.transform.localScale *= (1f + volumeScale);
+                        }
 
                 // --- SET NEXT ALLOWED PLAY TIME --------------------------------------
                 _nextPlayTime[type] = Time.time + effect.cooldown;
@@ -744,6 +749,13 @@ namespace Mayuns.DSB
                 }
                 info.clips = clips.ToArray();
                 info.particlePrefabs = null;
+
+                if (type == EffectType.LargeCollapse)
+                {
+                    var dust = Resources.Load<GameObject>("ParticleEffects/Dust_1");
+                    if (dust != null)
+                        info.particlePrefabs = new[] { dust };
+                }
 
                 if (type == EffectType.Crumble)
                 {
@@ -802,6 +814,18 @@ namespace Mayuns.DSB
                 "Window_Shatter_Default3",
                 "Window_Shatter_Default4"
             });
+
+            // Ensure large collapses use dust particles by default
+            foreach (var info in effectList)
+            {
+                if (info.type == EffectType.LargeCollapse &&
+                    (info.particlePrefabs == null || info.particlePrefabs.Length == 0))
+                {
+                    var dust = Resources.Load<GameObject>("ParticleEffects/Dust_1");
+                    if (dust != null)
+                        info.particlePrefabs = new[] { dust };
+                }
+            }
 
             effects = effectList.ToArray();
         }
