@@ -373,14 +373,21 @@ namespace Mayuns.DSB.Editor
                 // Apply new mode if changed
                 if (newWallMode != StructureBuildTool.currentWallEditSubMode)
                 {
-                    StructureBuildTool.currentWallEditSubMode = newWallMode;
                     StructureBuildTool.SetWallEditSubMode(newWallMode);
+                    if (newWallMode == StructureBuildTool.WallEditSubMode.None)
+                    {
+                        EditorGUILayout.EndHorizontal();
+                        EditorGUI.EndChangeCheck(); // balance BeginChangeCheck
+                        return;
+                    }
                 }
 
                 if (GUILayout.Button("Deselect Wall", GUILayout.Width(100)))
                 {
-                    StructureBuildTool.currentWallEditSubMode = StructureBuildTool.WallEditSubMode.None;
                     StructureBuildTool.SetWallEditSubMode(StructureBuildTool.WallEditSubMode.None);
+                    EditorGUILayout.EndHorizontal();
+                    EditorGUI.EndChangeCheck();
+                    return;
                 }
 
                 EditorGUILayout.EndHorizontal();
