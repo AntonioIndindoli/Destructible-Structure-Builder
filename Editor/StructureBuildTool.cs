@@ -306,6 +306,9 @@ namespace Mayuns.DSB.Editor
                 connectionGO.transform.SetParent(newStructure.transform, true);
 
                 StructuralConnection connectionReference = connectionGO.AddComponent<StructuralConnection>();
+                connectionReference.textureScaleX = buildSettings.memberTextureScaleX;
+                connectionReference.textureScaleY = buildSettings.memberTextureScaleY;
+                connectionReference.BuildConnection();
 
                 if (buildSettings.memberMaterial != null)
                     connectionGO.GetComponent<MeshRenderer>().sharedMaterial = buildSettings.memberMaterial;
@@ -1287,6 +1290,9 @@ namespace Mayuns.DSB.Editor
                 Undo.AddComponent<BoxCollider>(connGO);
                 endConn = Undo.AddComponent<StructuralConnection>(connGO);
                 endConn.structuralGroup = connection.structuralGroup;
+                endConn.textureScaleX = buildSettings.memberTextureScaleX;
+                endConn.textureScaleY = buildSettings.memberTextureScaleY;
+                endConn.BuildConnection();
 
                 Undo.SetTransformParent(connGO.transform,
                                         connection.structuralGroup.transform,
