@@ -669,8 +669,9 @@ namespace Mayuns.DSB
             {
                 float tVal = Mathf.InverseLerp(1f, 100f, structuralGroup.structuralMembersHash.Count);
                 float collapseVolume = Mathf.Lerp(0.1f, .8f, tVal);
+                float collapseScale = Mathf.Lerp(1f, 3f, tVal);
 
-                PlayLargeCollapseAt(groupGO.transform.position, collapseVolume);
+                PlayLargeCollapseAt(groupGO.transform.position, collapseVolume, collapseScale);
             }
         }
 
@@ -684,9 +685,9 @@ namespace Mayuns.DSB
             PlayEffects(EffectType.MemberStress, position);
         }
 
-        public void PlayLargeCollapseAt(Vector3 position, float volumeScale)
+        public void PlayLargeCollapseAt(Vector3 position, float volumeScale, float particleScale)
         {
-            PlayEffects(EffectType.LargeCollapse, position, volumeScale);
+            PlayEffects(EffectType.LargeCollapse, position, volumeScale, particleScale);
         }
 
         public void PlayWindowShatterAt(Vector3 position)
@@ -696,10 +697,15 @@ namespace Mayuns.DSB
 
         private void PlayEffects(EffectType type, Vector3 position)
         {
-            PlayEffects(type, position, .5f);
+            PlayEffects(type, position, .5f, 1f);
         }
 
         private void PlayEffects(EffectType type, Vector3 position, float volumeScale)
+        {
+            PlayEffects(type, position, volumeScale, 1f);
+        }
+
+        private void PlayEffects(EffectType type, Vector3 position, float volumeScale, float particleScale)
         {
             if (effects == null) return;
 
@@ -724,7 +730,7 @@ namespace Mayuns.DSB
                         {
                             var obj = Instantiate(prefab, position, Quaternion.identity);
                             if (type == EffectType.LargeCollapse)
-                                obj.transform.localScale *= (1f + volumeScale);
+                                obj.transform.localScale *= particleScale;
 
                             // destroy particle object once all systems have finished
                             var systems = obj.GetComponentsInChildren<ParticleSystem>();
