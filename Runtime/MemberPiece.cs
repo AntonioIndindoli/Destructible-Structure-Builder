@@ -14,14 +14,6 @@ namespace Mayuns.DSB
         [Header("Destruction Events")]
         public UnityEvent onDestroyed;
 
-        /// <summary>
-        /// Apply enough damage to immediately destroy this piece.
-        /// </summary>
-        public void DestroyMemberPiece()
-        {
-            TakeDamage(member.voxelHealth);
-        }
-
         void Start()
         {
             // Pre‑generate debris so destruction is instant at runtime

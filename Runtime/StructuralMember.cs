@@ -190,7 +190,7 @@ namespace Mayuns.DSB
 
 			if (memberPiece != null && !memberPiece.isDestroyed)
 			{
-				memberPiece.DestroyMemberPiece();
+				memberPiece.TakeDamage(voxelHealth*999f);
 			}
 		}
 
