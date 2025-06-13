@@ -451,8 +451,8 @@ namespace Mayuns.DSB
 		}
 
 #if UNITY_EDITOR
-		public void BuildMember()
-		{
+                public void BuildMember()
+                {
 			// ────────────────────────────────────────────────────────────────────────────
 			// 1) Wrap everything in ONE undo group
 			// ────────────────────────────────────────────────────────────────────────────
@@ -469,20 +469,22 @@ namespace Mayuns.DSB
 			//──────────────────────────────────────────────────────────────────────────────
 			// 2) Destroy existing voxels via the Undo system
 			//──────────────────────────────────────────────────────────────────────────────
-			if (memberPieces != null)
-			{
-				for (int i = 0; i < memberPieces.Length; i++)
-				{
-					if (!Application.isPlaying && memberPieces[i])
-						Undo.DestroyObjectImmediate(memberPieces[i]);
-					else
+                        if (memberPieces != null)
+                        {
+                                for (int i = 0; i < memberPieces.Length; i++)
+                                {
+                                        if (!Application.isPlaying && memberPieces[i])
+                                                Undo.DestroyObjectImmediate(memberPieces[i]);
+                                        else
 
-						if (memberPieces[i])
-						DestroyImmediate(memberPieces[i]);
+                                                if (memberPieces[i])
+                                                DestroyImmediate(memberPieces[i]);
 
-					memberPieces[i] = null;
-				}
-			}
+                                        memberPieces[i] = null;
+                                }
+                        }
+
+                        RemoveOrphanMemberPieces();
 
 			//──────────────────────────────────────────────────────────────────────────────
 			// 3) Regular mesh/size maths (unchanged) …                                     
@@ -627,14 +629,35 @@ namespace Mayuns.DSB
 			//──────────────────────────────────────────────────────────────────────────────
 			// 6) Dirty the object & scene, then collapse/group the whole operation
 			//──────────────────────────────────────────────────────────────────────────────
-			if (!Application.isPlaying)
-			{
-				EditorUtility.SetDirty(this);
-				EditorSceneManager.MarkSceneDirty(gameObject.scene);
-				Undo.CollapseUndoOperations(undoGroup);
-			}
+                        if (!Application.isPlaying)
+                        {
+                                EditorUtility.SetDirty(this);
+                                EditorSceneManager.MarkSceneDirty(gameObject.scene);
+                                Undo.CollapseUndoOperations(undoGroup);
+                        }
 
-		}
+                }
+
+                void RemoveOrphanMemberPieces()
+                {
+                        var pieces = GetComponentsInChildren<MemberPiece>(true);
+                        var referenced = new HashSet<GameObject>();
+                        if (memberPieces != null)
+                        {
+                                foreach (var go in memberPieces)
+                                        if (go != null)
+                                                referenced.Add(go);
+                        }
+
+                        foreach (var piece in pieces)
+                        {
+                                bool keep = referenced.Contains(piece.gameObject) || piece.GetComponentInParent<Chunk>() != null;
+                                if (!keep)
+                                {
+                                        Undo.DestroyObjectImmediate(piece.gameObject);
+                                }
+                        }
+                }
 #endif
 	}
 

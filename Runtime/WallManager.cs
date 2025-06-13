@@ -748,11 +748,11 @@ namespace Mayuns.DSB
 		}
 
 		/*–– helper to build a voxel from an already‑cached mesh –––––––––––––*/
-		GameObject CreateVoxelFromCachedMesh(int gx, int gy,
-											 Vector3 worldPos, Vector3 cubeSize,
-											 bool isWindow, bool isTriangle,
-											 Mesh cachedMesh, Material defaultMat)
-		{
+                GameObject CreateVoxelFromCachedMesh(int gx, int gy,
+                                                        Vector3 worldPos, Vector3 cubeSize,
+                                                        bool isWindow, bool isTriangle,
+                                                        Mesh cachedMesh, Material defaultMat)
+                {
 			string n = isWindow ? $"WallWindowVoxel_{gx}_{gy}" :
 					   isTriangle ? $"WallTriangleVoxel_{gx}_{gy}" :
 									 $"WallVoxel_{gx}_{gy}";
@@ -767,17 +767,58 @@ namespace Mayuns.DSB
 			var mr = go.AddComponent<MeshRenderer>();
 			mr.sharedMaterial = isWindow ? glassMaterial : defaultMat;
 
-			return go;
-		}
+                        return go;
+                }
+
+                void RemoveOrphanWallPieces(List<WallPiece> grid)
+                {
+                        var allPieces = GetComponentsInChildren<WallPiece>(true);
+                        var referenced = new HashSet<WallPiece>();
+                        if (grid != null)
+                        {
+                                foreach (var p in grid)
+                                        if (p != null)
+                                                referenced.Add(p);
+                        }
+
+                        var chunkReferenced = new HashSet<WallPiece>();
+                        foreach (var chunk in _chunks)
+                        {
+                                if (chunk == null) continue;
+                                foreach (var go in chunk.wallPieces)
+                                {
+                                        if (go == null) continue;
+                                        var wp = go.GetComponent<WallPiece>();
+                                        if (wp != null)
+                                                chunkReferenced.Add(wp);
+                                }
+
+                                var proxy = chunk.GetComponent<WallPiece>();
+                                if (proxy != null)
+                                        referenced.Add(proxy);
+                        }
+
+                        foreach (var piece in allPieces)
+                        {
+                                bool keep = referenced.Contains(piece) || chunkReferenced.Contains(piece) ||
+                                             (piece.isProxy && piece.chunk != null && _chunks.Contains(piece.chunk));
+                                if (!keep)
+                                {
+                                        Undo.DestroyObjectImmediate(piece.gameObject);
+                                }
+                        }
+                }
 
 		/*───────────────────────────────────────────────────────────────────*\
          *  BUILD‑WALL  (editor‑only version)                                *
         \*───────────────────────────────────────────────────────────────────*/
 
-		public void BuildWall(List<WallPiece> wallGrid, bool rebuilding, StructureBuildSettings settings)
-		{
-			int fp = ComputeFingerprint();   // walls that “look” the same share fp
-			_lastWallFingerprint = fp;
+                public void BuildWall(List<WallPiece> wallGrid, bool rebuilding, StructureBuildSettings settings)
+                {
+                        int fp = ComputeFingerprint();   // walls that “look” the same share fp
+                        _lastWallFingerprint = fp;
+
+                        RemoveOrphanWallPieces(wallGrid);
 
 			if (settings != null)
 			{
