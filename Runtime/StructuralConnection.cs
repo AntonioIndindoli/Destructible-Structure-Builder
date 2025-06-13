@@ -131,12 +131,22 @@ namespace Mayuns.DSB
 
     public class StructuralConnection : Destructible, IDamageable
     {
+        [HideInInspector] public float textureScaleX = 1f;
+        [HideInInspector] public float textureScaleY = 1f;
         [field: SerializeField, HideInInspector] MemberMap _members = new();
         [HideInInspector] public StructuralGroupManager structuralGroup;
         [HideInInspector] public bool isDestroyed;
         public float health = 100f;
 
-        void Start() => CreateAndStoreDebrisData(1, false);
+        void Start()
+        {
+            BuildConnection();
+            CreateAndStoreDebrisData(1, false);
+        }
+
+#if UNITY_EDITOR
+        void OnValidate() => BuildConnection();
+#endif
 
         /// <summary>
         /// Remove this connection when no members remain attached.
@@ -218,6 +228,21 @@ namespace Mayuns.DSB
         {
             _members[slot] = newMem;
             endConn._members[slot.Opposite()] = newMem;
+        }
+
+        public void BuildConnection()
+        {
+            var mf = GetComponent<MeshFilter>();
+            if (mf == null || mf.sharedMesh == null) return;
+
+            Mesh mesh = Instantiate(mf.sharedMesh);
+            Vector2[] uvs = mesh.uv;
+            Vector2 scale = new(textureScaleX, textureScaleY);
+            for (int i = 0; i < uvs.Length; i++)
+                uvs[i] = Vector2.Scale(uvs[i], scale);
+            mesh.uv = uvs;
+            mesh.RecalculateBounds();
+            mf.sharedMesh = mesh;
         }
     }
 }
