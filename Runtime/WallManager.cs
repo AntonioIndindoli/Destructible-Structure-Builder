@@ -1222,9 +1222,41 @@ namespace Mayuns.DSB
 					Undo.RecordObject(this, "Assign Wall Proxy Piece");
 					wallGrid[idx] = proxy;
 				}
-			}
-		}
+                        }
+                }
+
+#if UNITY_EDITOR
+        public void EnsureMeshesPersisted()
+        {
+                int fp = ComputeFingerprint();
+
+                for (int i = 0; i < _chunks.Count; i++)
+                {
+                        var chunk = _chunks[i];
+                        if (chunk == null) continue;
+                        var mf = chunk.GetComponent<MeshFilter>();
+                        if (mf && mf.sharedMesh && string.IsNullOrEmpty(AssetDatabase.GetAssetPath(mf.sharedMesh)))
+                        {
+                                mf.sharedMesh = MeshCacheUtility.PersistChunk(mf.sharedMesh, fp, i);
+                        }
+                }
+
+                if (wallGrid != null)
+                {
+                        for (int i = 0; i < wallGrid.Count; i++)
+                        {
+                                var piece = wallGrid[i];
+                                if (piece == null || piece.isProxy) continue;
+                                var mf = piece.GetComponent<MeshFilter>();
+                                if (mf && mf.sharedMesh && string.IsNullOrEmpty(AssetDatabase.GetAssetPath(mf.sharedMesh)))
+                                {
+                                        mf.sharedMesh = MeshCacheUtility.PersistPiece(mf.sharedMesh, fp, i);
+                                }
+                        }
+                }
+        }
+#endif
 
 #endif
-	}
+        }
 }
