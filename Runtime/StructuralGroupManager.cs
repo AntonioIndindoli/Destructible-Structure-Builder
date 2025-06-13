@@ -969,7 +969,7 @@ namespace Mayuns.DSB
                 {
                     wall.InstantUncombine();
                     wall.RelinkWallGridReferences();
-                    wall.BuildWall(wall.wallGrid, true, buildSettings);
+                    wall.BuildWall(wall.wallGrid, true, buildSettings, true);
                     UnityEditor.EditorUtility.SetDirty(wall);
                 }
             }
