@@ -1,14 +1,14 @@
-# Destructible-Structure-Builder
+# Destructible Structure Builder
 
-## Event Hooks
+Destructible Structure Builder is a toolkit for Unity that lets you create walls and structural members that react to damage and crumble apart at runtime. It includes editor helpers for rapidly assembling buildings, a physics-based destruction framework and a library of demo materials, sounds and particle effects.
 
-`MemberPiece` and `WallPiece` expose `onDestroyed` events and `Destructible` exposes `onCrumble`.
-`WallPiece` also exposes `onWindowShatter` for window pieces.
-`StructuralGroupManager` now plays additional effects automatically:
+*Compatible with Unity 2021.3 LTS – 2022.3*
 
-- **MemberStress** clips trigger when overloaded members are damaged over time.
-- **LargeCollapse** clips trigger when a detached group with more than four members is created.
-- Large collapse particle effects now scale with the detached group's size.
-- **WindowShatter** clips trigger when a window piece is destroyed.
+## Key Features
 
-Audio clips are loaded from `Resources/SoundEffects` when no custom clips are assigned.
+- Voxel-based beams and wall pieces with per-cell health
+- Automatic stress simulation and collapse behaviour
+- Event hooks for custom effects (`onDestroyed`, `onCrumble`, etc.)
+- Sample scene and URP-ready materials
+
+See the full [Manual](Documentation/Manual.md) for setup and usage instructions.
